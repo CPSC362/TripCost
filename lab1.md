@@ -14,10 +14,16 @@
 -   Key Features:
 -   Usefulness of the System:
 
-Programming languages: Python 2.7.5
+## Programming languages
 
-Operating system: Mac OSX/Windows for development | Heroku GNU/Linux
-EC-2 instance for production
+Python 2.7.5
 
-Tools, frameworks, and systems: Python Flask 0.10, Google Directions
+## Operating systems
+
+- Development: Mac OSX/Windows/Linux
+- Production: Heroku GNU/Linux EC-2 instance
+
+## Tools, frameworks, and systems
+
+Python Flask 0.10, Google Directions
 API, FuelEconomy.gov Web Services, myGasFeed API, Bootstrap, GitHub
