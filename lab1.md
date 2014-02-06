@@ -1,6 +1,7 @@
 # Project Information (Lab 1)
 
 -   Project title: TripCost
+
 -   Project description: TripCost is a calculator capable of providing
     crucial cost information to the user about their car trip. Current
     tools available today offer directions, current gas prices, and
@@ -10,9 +11,22 @@
     the vehicle’s government rated MPG, and current gas station prices
     for a given location will enable the user to get a better idea if
     driving is really the best and most cost effective option.
--   Major Goals:
+
+-   Major Goals: We hope to enable users to adequately estimate the
+    total cost of their trip while keeping user input minimal. This
+    will be ideal as we aim to target the mobile platform.
+
 -   Key Features:
--   Usefulness of the System:
+      -   Distance calculation provided by Google Directions
+          API
+      -   Vehicle MPG provided by government (U.S. Department of Energy)
+          API
+      -   Current gas prices calculated by locale based on mygasfeed.com
+          or http://www.mshd.net/documentation/gasprices
+
+-   Usefulness of the System: Our software will target the mobile
+    platform, but will also be accessible via desktop. Our API will be
+    accessible from anywhere and allow users flexible use.
 
 ## Programming languages
 
