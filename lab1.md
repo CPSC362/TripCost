@@ -27,3 +27,25 @@ Python 2.7.5
 
 Python Flask 0.10, Google Directions
 API, FuelEconomy.gov Web Services, myGasFeed API, Bootstrap, GitHub
+
+## Framework Activities
+
+- Planning
+  1. Determine what requirements should be addressed during the
+     iteration.
+  2. Decide on the time frame for the iteration.
+  3. Divide tasks among team members.
+- Design
+  1. Determine what classes/objects are needed to meet the
+     requirements and how they should interact.
+  2. Refine the previous iteration's design to accomodate interaction
+     with new classes/objects.
+- Coding
+  1. Create test cases.
+  2. Write code.
+- Testing
+  1. Test code using test cases.
+  2. Revisit the Design and Coding stages to fix any errors. 
+- Deployment
+  1. Release a working product meeting the requirements for the
+     iteration.
