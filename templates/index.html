@@ -11,6 +11,7 @@
 
 {% block metas %}
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes" />
 {% endblock %}
 
 {% block styles -%}
@@ -63,7 +64,32 @@
       </div>
     </div>
 
+    <div class="form-container">
+      
+      <form action="" method="get">
+        
+        <div class="form-group">
 
-      <div id="map-canvas"></div>
+          <div class="form-header">
+            <h2>Get Directions</h2>
+          </div>
+          
+          <div class="left-inner-addon">
+            <i class="fa fa-location-arrow fa-2x"></i>
+            <input type="text" name="start" id="start" placeholder="Start..." class="form-control input-lg" />
+          </div>
+
+          <div class="left-inner-addon">
+            <i class="fa fa-crosshairs fa-2x"></i>
+            <input type="text" name="destination" id="destination" placeholder="Destination..." class="form-control input-lg" />
+          </div>
+
+        </div>
+
+      </form>
+
+    </div>
+
+    <div id="map-canvas"></div>
 
 {% endblock %}
