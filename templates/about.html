@@ -1,0 +1,72 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block title %}TripCost - About us{% endblock %}
+
+{% block head %}
+{{ super() }}
+{{ fixes.ie8() }}
+{% endblock %}
+
+{% block metas %}
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+{% endblock %}
+
+{% block styles -%}
+{{super()}}
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+<link href="{{url_for('.static', filename='css/style.css')}}" rel="stylesheet">
+{% endblock styles %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('.static', filename='js/jquery-2.1.0.min.js')}}"></script>
+<script src="{{url_for('.static', filename='js/main.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+
+{% include 'nav.html' %}
+
+<div class="container container-pushed about-us">
+  <div class="row">
+    <div class="jumbotron map-bg">
+      <h1>The TripCost Team</h1>
+      <!-- <p>The team that brought you TripCost</p> -->
+    </div>
+    <ul class="list-inline">
+      <li class="col-md-3">
+        <article class="thumbnail">
+          <img src="{{ 'austingym@gmail.com' | gravatar }}" alt="Austin White" class="img-circle">
+          <h3>Austin White</h3>
+          <p>austinw@csu.fullerton.edu</p>
+        </article>
+      </li>
+      <li class="col-md-3">
+        <article class="thumbnail">
+          <img src="{{ 'americannimrod@gmail.com' | gravatar }}" alt="Kurtis Schlepp" class="img-circle">
+          <h3>Kurtis Schlepp</h3>
+          <p>americannimrod@gmail.com</p>
+        </article>
+      </li>
+      <li class="col-md-3">
+        <article class="thumbnail">
+          <img src="{{ 'mariop08@csu.fullerton.edu' | gravatar }}" alt="Mario Pena" class="img-circle">
+          <h3>Mario Pena</h3>
+          <p>mariop08@csu.fullerton.edu</p>
+        </article>
+      </li>
+      <li class="col-md-3">
+        <article class="thumbnail">
+          <img src="{{ 'dmizuki@csu.fullerton.edu' | gravatar }}" alt="Daniel Mizuki" class="img-circle">
+          <h3>Daniel Mizuki</h3>
+          <p>dmizuki@csu.fullerton.edu</p>
+        </article>
+      </li>
+    </ul>
+  </div>
+</div>
+
+{% include 'footer.html' %}
+{% endblock %}

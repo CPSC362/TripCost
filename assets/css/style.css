@@ -8,9 +8,9 @@ body {
   padding:0;
 }
 
-.container-full {
-  margin: 0 auto;
-  width: 100%;
+.container-pushed {
+  margin-top:50px;
+  padding-top:15px;
 }
 
 /* Google Maps */
@@ -79,11 +79,45 @@ body {
   margin:0;
 }
 
+.form-container .form-header .close {
+  float:right;
+  display:block;
+  margin:0;
+  padding:0;
+  margin-top:-30px;
+}
+
 .form-container .form-header h2 {
   font-weight:normal;
   margin:0;
+  display: block;
 }
 
 .form-container input[type=text] {
   border-radius: 0;
+}
+
+.footer {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  margin-top: 40px;
+  border-top: 1px solid #eee;
+}
+
+@media screen and (min-width: 768px) {
+  /* Remove the padding we set earlier */
+  .footer {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
+.about-us .map-bg {
+  background:url('/assets/img/map-bg.jpg');
+  background-position: center;
+}
+
+.about-us .thumbnail {
+  border:none;
+  text-align:center;
 }
