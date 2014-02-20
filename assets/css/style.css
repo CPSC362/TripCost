@@ -37,8 +37,8 @@ body {
 .form-container {
   position:fixed;
 
-  top:70px;
-  left:100px;
+  top:100px;
+  left:10px;
 
   width:300px;
   
@@ -52,10 +52,10 @@ body {
   padding-bottom:0px;
 }
 
-@media (max-width: 320px) {
+@media (min-width: 768px) {
   .form-container {
-    top:100px;
-    left:10px;
+    top:70px;
+    left:100px;
   }
 }
 
