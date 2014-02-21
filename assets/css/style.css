@@ -25,7 +25,7 @@ body {
     position: relative;
 }
 .left-inner-addon input {
-    padding-left: 40px;    
+    padding-left: 30px;    
 }
 .left-inner-addon i {
     position: absolute;
@@ -50,14 +50,6 @@ body {
 
   margin-left:-150px;
   padding-bottom:0px;
-}
-
-@media (min-width: 768px) {
-  .form-container {
-    top:70px;
-    left:100px;
-    margin:0;
-  }
 }
 
 .form-container .form-header {
@@ -92,10 +84,35 @@ body {
   font-weight:normal;
   margin:0;
   display: block;
+  font-size:16px;
 }
 
 .form-container input[type=text] {
   border-radius: 0;
+}
+
+/* DESKTOP */
+@media (min-width: 768px) {
+
+  .form-container {
+    top:70px;
+    left:100px;
+    margin:0;
+  }
+
+  .form-container .form-header h2 {
+    font-size:30px;
+  }
+
+  /* Remove the padding we set earlier */
+  .footer {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .directions-dropdown {
+    width:300px;
+  }
 }
 
 .footer {
@@ -103,14 +120,6 @@ body {
   padding-bottom: 40px;
   margin-top: 40px;
   border-top: 1px solid #eee;
-}
-
-@media screen and (min-width: 768px) {
-  /* Remove the padding we set earlier */
-  .footer {
-    padding-right: 0;
-    padding-left: 0;
-  }
 }
 
 .about-us .map-bg {
