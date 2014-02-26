@@ -43,11 +43,14 @@ $(function() {
 
         if (problem) return;
 
+        tripCost.vehicle = directionsForm.vehicle.find(':selected').val();
+
         tripCost.getDirections($('#start').val(), $('#destination').val(), {
             success: function(trip) {
                 $('#results-button').fadeIn();
+                closeMenus();
 
-                console.log(fuelEconomy.vehicle);
+                // Process results
             },
             error: function(result, status) {
                 directionsForm.routeError.html(tripCost.errorMessage(status));
@@ -96,6 +99,8 @@ $(function() {
     $('a[href="#results-container"]').click(function(e) {
         e.preventDefault();
 
+        closeMenus();
+
         $('html, body').animate({
             scrollTop: $("#results-container").offset().top
         }, 500);
@@ -103,6 +108,8 @@ $(function() {
 
     $('a[href="#"]').click(function(e) {
         e.preventDefault();
+
+        closeMenus();
 
         $('html, body').animate({
             scrollTop: $("body").offset().top
