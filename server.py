@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template, make_response, jsonify
+from flask import Flask, render_template, make_response, jsonify, request
 from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
 from flaskext.gravatar import Gravatar
@@ -28,29 +28,53 @@ gravatar = Gravatar(app,
                     force_default=False,
                     use_ssl=False,
                     base_url=None)
-	
+    
 Bootstrap(app)
 
 @app.route('/')
 def index():
-	return render_template('index.html')
+    return render_template('index.html')
 
 @app.route('/about')
 def about():
-	return render_template('about.html')
+    return render_template('about.html')
 
 @app.route('/vehicle-menu-year')
 def vehicle_menu():
-     req = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/menu/year', headers={'Accept': 'application/json'})
-     return jsonify(req.json()), req.status_code
+    req = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/menu/year', headers={'Accept': 'application/json'})
+    return jsonify(req.json()), req.status_code
 
 @app.route('/vehicle-menu-make')
 def vehicle_make():
-     year = request.args.get('year', '')
-     req = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/menu/make', params={'year': year}, headers={'Accept': 'application/json'})
-     return jsonify(req.json()), req.status_code
+    vehicle = {
+        'year': request.args.get('year')
+    }
+
+    req = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/menu/make', params=vehicle, headers={'Accept': 'application/json'})
+    return jsonify(req.json()), req.status_code
+
+@app.route('/vehicle-menu-model')
+def vehicle_model():
+    vehicle = {
+        'year': request.args.get('year'),
+        'make': request.args.get('make')
+    }
+
+    req = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/menu/model', params=vehicle, headers={'Accept': 'application/json'})
+    return jsonify(req.json()), req.status_code
+
+@app.route('/vehicle-menu-options')
+def vehicle_options():
+    vehicle = {
+        'year': request.args.get('year'),
+        'make': request.args.get('make'),
+        'model': request.args.get('model')
+    }
+
+    req = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/menu/options', params=vehicle, headers={'Accept': 'application/json'})
+    return jsonify(req.json()), req.status_code
 
 
 if __name__ == '__main__':
-	port = int(os.environ.get("PORT", 5000))
-	app.run(host='0.0.0.0', debug=True, port=port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', debug=True, port=port)
