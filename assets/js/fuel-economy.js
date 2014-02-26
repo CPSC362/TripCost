@@ -27,11 +27,15 @@ var FuelEconomy = (function(jQuery){
             id: null
         };
 
-        var base = '/';
+        this.yearMenuLoaded = false;
+
+        this.serverError = 'There was a problem contacting the FuelEconomy.gov server';
+
+        var baseUrl = '/';
 
         this.getVehicleMenuYear = function(callback) {
 
-            var endpoint = base + 'vehicle-menu-year';
+            var endpoint = baseUrl + 'vehicle-menu-year';
 
             this.loading(true);
             
@@ -45,7 +49,7 @@ var FuelEconomy = (function(jQuery){
 
         this.getVehicleMenuMake = function(callback) {
 
-            var endpoint = base + 'vehicle-menu-make';
+            var endpoint = baseUrl + 'vehicle-menu-make';
 
             this.loading(true);
 
@@ -59,7 +63,7 @@ var FuelEconomy = (function(jQuery){
 
         this.getVehicleMenuModel = function(callback) {
 
-            var endpoint = base + 'vehicle-menu-model';
+            var endpoint = baseUrl + 'vehicle-menu-model';
 
             this.loading(true);
 
@@ -73,7 +77,7 @@ var FuelEconomy = (function(jQuery){
 
         this.getVehicleMenuOptions = function(callback) {
 
-            var endpoint = base + 'vehicle-menu-options';
+            var endpoint = baseUrl + 'vehicle-menu-options';
 
             this.loading(true);
 
@@ -90,10 +94,17 @@ var FuelEconomy = (function(jQuery){
 
         var self = this;
 
-        this.getVehicleMenuYear(function(data, textStatus) {
-            self.loading(false);
-            self._populateSelect(selectMenu, data);
-        });
+        if ( ! this.yearMenuLoaded) {
+            this.getVehicleMenuYear(function(data, textStatus) {
+                if (textStatus == "success") {
+                    self.yearMenuLoaded = true;
+                    self.loading(false);
+                    self._populateSelect(selectMenu, data);
+                } else {
+                    alert(this.serverError);
+                }
+            });
+        }
     };
 
     FuelEconomy.prototype.vehicleMakeMenu = function(year, selectMenu) {
@@ -103,8 +114,12 @@ var FuelEconomy = (function(jQuery){
         var self = this;
 
         this.getVehicleMenuMake(function(data, textStatus) {
-            self.loading(false);
-            self._populateSelect(selectMenu, data);
+            if (textStatus == "success") {
+                self.loading(false);
+                self._populateSelect(selectMenu, data);
+            } else {
+                alert(this.serverError);
+            }
         });
     };
 
@@ -115,8 +130,12 @@ var FuelEconomy = (function(jQuery){
         var self = this;
 
         this.getVehicleMenuModel(function(data, textStatus) {
-            self.loading(false);
-            self._populateSelect(selectMenu, data);
+            if (textStatus == "success") {
+                self.loading(false);
+                self._populateSelect(selectMenu, data);
+            } else {
+                alert(this.serverError);
+            }
         });
     };
 
@@ -127,8 +146,12 @@ var FuelEconomy = (function(jQuery){
         var self = this;
 
         this.getVehicleMenuOptions(function(data, textStatus) {
-            self.loading(false);
-            self._populateSelect(selectMenu, data);
+            if (textStatus == "success") {
+                self.loading(false);
+                self._populateSelect(selectMenu, data);
+            } else {
+                alert(this.serverError);
+            }
         });
     };
 
@@ -144,6 +167,9 @@ var FuelEconomy = (function(jQuery){
     };
 
     FuelEconomy.prototype._populateSelect = function(selectMenu, data) {
+        
+        $(selectMenu).find('option:first-child').text('Choose...');
+        $(selectMenu).find('option:not(:eq(0))').remove();
         $.each(data.menuItem, function(index, item) {
             $(selectMenu).append($("<option></option>").attr("value", item.value).text(item.text));
         });
@@ -160,6 +186,14 @@ var FuelEconomy = (function(jQuery){
     FuelEconomy.prototype.setSpinner = function(spinnerElement) {
         this._spinner = spinnerElement;
     };
+
+    FuelEconomy.prototype.reset = function(form) {
+        $(form).find('select').val('');
+    };
+
+    FuelEconomy.prototype.vehicleName = function(theVehicle) {
+        return theVehicle.year + ' ' + theVehicle.make + ' ' + theVehicle.model;
+    }
 
     return FuelEconomy;
 

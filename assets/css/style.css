@@ -22,15 +22,18 @@ body {
 
 /* From: http://stackoverflow.com/questions/18838964/add-bootstrap-glyphicon-to-input-box/18839305#18839305 */
 .left-inner-addon {
-    position: relative;
+  position: relative;
 }
 .left-inner-addon input {
-    padding-left: 30px;    
+  padding-left: 30px;    
 }
 .left-inner-addon i {
-    position: absolute;
-    padding: 10px 12px;
-    pointer-events: none;
+  position: absolute;
+  padding: 10px 12px;
+  pointer-events: none;
+}
+.vehicle-select {
+  font-family: 'FontAwesome', Helvetica;
 }
 /* ///////////////// */
 
@@ -113,6 +116,22 @@ body {
   .directions-dropdown {
     width:300px;
   }
+}
+
+#results-container h1 {
+  display:inline-block;
+}
+
+#results-container i.fa-arrow-circle-o-up {
+  font-size:2em;
+}
+
+#results-button {
+  display:none;
+}
+
+.vehicle-select-error {
+  
 }
 
 .footer {

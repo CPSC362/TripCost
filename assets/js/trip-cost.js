@@ -23,6 +23,16 @@ var TripCost = (function(google){
 
         this.googleProvider = google;
 
+        this.routed = false;
+
+        this.trip = null;
+
+        this.vehicle = null;
+
+        this.vehicles = [];
+
+        this._spinner = null;
+
         this.initialize();
     };
 
@@ -66,12 +76,14 @@ var TripCost = (function(google){
     | Google Maps will return turn by turn directions and render on the map
     |
     */
-    TripCost.prototype.getDirections = function(start, destination) {
+    TripCost.prototype.getDirections = function(start, destination, callbacks) {
 
         // Preserve reference to instance
         var self = this;
         
         this.directionsDisplay.setMap(this.map);
+
+        this.loading(true);
         
         var request = {
             origin: start,
@@ -80,22 +92,59 @@ var TripCost = (function(google){
         };
 
         this.directionsService.route(request, function(result, status) {
+
+            self.loading(false);
+
             if (status == self.googleProvider.maps.DirectionsStatus.OK) {
 
                 // Output the result object for reference
                 console.log(result);
 
                 self.directionsDisplay.setDirections(result);
+
+                self.trip = result;
+                self.routed = true;
+
+                callbacks.success(self.trip);
+            } else {
+                callbacks.error(result, status);
             }
         });
     }
 
-    TripCost.prototype.populateVehicleYearMenu = function() {
+    TripCost.prototype.addVehicle = function(vehicle) {
+        this.vehicles.push(vehicle);
+        return this.vehicles.length;
+    };
 
-        var self = this;
+    TripCost.prototype.loading = function(status) {
+        if (status) {
+            $(this._spinner).removeClass('fa-map-marker').addClass('fa-spinner fa-spin');
+        } else {
+            $(this._spinner).removeClass('fa-spinner fa-spin').addClass('fa-map-marker');
+        }
+    };
 
-        // var 
-    }
+    TripCost.prototype.setSpinner = function(spinnerElement) {
+        this._spinner = spinnerElement;
+    };
+
+    TripCost.prototype.errorMessage = function(status) {
+        if (status == this.googleProvider.maps.DirectionsStatus.NOT_FOUND)
+            return 'Invalid start or destination point';
+        if (status == this.googleProvider.maps.DirectionsStatus.ZERO_RESULTS)
+            return 'Route could not be found';
+        if (status == this.googleProvider.maps.DirectionsStatus.MAX_WAYPOINTS_EXCEEDED)
+            return 'Too many waypoints';
+        if (status == this.googleProvider.maps.DirectionsStatus.INVALID_REQUEST)
+            return 'Missing a start or destination';
+        if (status == this.googleProvider.maps.DirectionsStatus.OVER_QUERY_LIMIT)
+            return 'Too many Google Maps requests from TripCost';
+        if (status == this.googleProvider.maps.DirectionsStatus.REQUEST_DENIED)
+            return 'Problem accessing Google Maps';
+        if (status == this.googleProvider.maps.DirectionsStatus.UNKNOWN_ERROR)
+            return 'Unidentified Google Maps error';
+    };
 
     return TripCost;
 

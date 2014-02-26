@@ -15,15 +15,16 @@
         <li><a href="{{url_for('about')}}">About Us</a></li>
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            <i class="fa fa-map-marker"></i> Directions <strong class="caret"></strong>
+            <i class="fa fa-map-marker directions-spinner"></i> Directions <strong class="caret"></strong>
           </a>
           <div class="dropdown-menu directions-dropdown" style="padding: 15px;">
-            <form action="#" method="#" accept-charset="UTF-8">
+            <form id="directions-form" action="#" method="#" accept-charset="UTF-8">
               
               <div class="form-group">
                 <div class="left-inner-addon">
                   <i class="fa fa-location-arrow"></i>
                   <input type="text" name="start" id="start" placeholder="Start..." class="form-control" />
+                  <span class="start-error label label-danger"></span>
                 </div>
               </div>
               
@@ -31,18 +32,27 @@
                 <div class="left-inner-addon">
                   <i class="fa fa-crosshairs"></i>
                   <input type="text" name="destination" id="destination" placeholder="Destination..." class="form-control" />
+                  <span class="destination-error label label-danger"></span>
                 </div>
+              </div>
+
+              <div class="form-group">
+                <select name="vehicle" class="form-control vehicle-select">
+                  <option value="">&#xf0d1; None</option>
+                </select>
+                <span class="vehicle-select-error label label-danger"></span>
               </div>
              
               <div class="form-group">
                 <input class="btn btn-primary btn-block" type="submit" name="submit" id="findRoute" value="Find Route" />
+                <span class="route-error label label-danger"></span>
               </div>
             </form>
           </div>
         </li>
         <li class="dropdown">
           <a class="dropdown-toggle" href="#" data-toggle="dropdown">
-            Vehicles <strong class="caret"></strong>
+            <i class="fa fa-truck"></i> Vehicles <strong class="caret"></strong>
           </a>
           <ul class="dropdown-menu">
             <li>
@@ -50,6 +60,7 @@
             </li>
           </ul>
         </li>
+        <li id="results-button"><a href="#results-container"><i class="fa fa-bar-chart-o"></i> Results</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <!-- User account -->
