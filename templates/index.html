@@ -23,8 +23,8 @@
 {% block scripts %}
 {{super()}}
 <script src="//maps.googleapis.com/maps/api/js?v=3&sensor=false&extension=.js"></script>
-<script src="{{url_for('.static', filename='js/jquery-2.1.0.min.js')}}"></script>
 <script src="{{url_for('.static', filename='js/trip-cost.js')}}"></script>
+<script src="{{url_for('.static', filename='js/fuel-economy.js')}}"></script>
 <script src="{{url_for('.static', filename='js/main.js')}}"></script>
 {% endblock %}
 
@@ -62,4 +62,53 @@
   </div>
 
   <div id="map-canvas"></div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="add-vehicle-modal" tabindex="-1" role="dialog" aria-labelledby="addVehicleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="addVehicleModalLabel">Add a Vehicle</h4>
+        </div>
+        <div class="modal-body">
+          <form action="#" method="post" class="form-horizontal" id="add-vehicle">
+            
+            <div class="form-group">
+              <div class="add-vehicle-year">
+                <label class="col-sm-2 control-label">Year:</label>
+                <div class="col-sm-10">
+                  <p class="form-control-static add-vehicle-year-select-container">
+                    <select name="add-vehicle-year" id="add-vehicle-year"></select>
+                  </p>
+                </div>
+              </div>
+
+              <div class="add-vehicle-make">
+                <label class="col-sm-2 control-label">Make:</label>
+                <div class="col-sm-10">
+                  <p class="form-control-static add-vehicle-make-select-container">
+                    <select name="add-vehicle-make" id="add-vehicle-make"></select>
+                  </p>
+                </div>
+              </div>
+
+              <div class="add-vehicle-model">
+                <label class="col-sm-2 control-label">Model:</label>
+                <div class="col-sm-10">
+                  <p class="form-control-static add-vehicle-model-select-container">
+                    <select name="add-vehicle-model" id="add-vehicle-model"></select>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

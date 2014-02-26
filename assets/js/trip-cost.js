@@ -90,6 +90,13 @@ var TripCost = (function(google){
         });
     }
 
+    TripCost.prototype.populateVehicleYearMenu = function() {
+
+        var self = this;
+
+        // var 
+    }
+
     return TripCost;
 
 })(google);

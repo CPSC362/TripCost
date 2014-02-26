@@ -2,6 +2,7 @@ $(function() {
     $('.dropdown-menu form').click(function(e) { e.stopPropagation(); });
 
     var tripCost = new TripCost('map-canvas', google);
+    var fuelEconomy = new FuelEconomy();
 
     $('#findRoute').click(function(e) {
         e.preventDefault();
@@ -18,5 +19,9 @@ $(function() {
             $('.navbar-toggle').click();
         }
     }
+
+    $('#add-vehicle-modal').on('shown.bs.modal', function (e) {
+        fuelEconomy.populateVehicleYearMenu($('.add-vehicle-year-select-container select'));
+    });
 
 });
