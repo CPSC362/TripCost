@@ -106,7 +106,7 @@ $(function() {
         }, 500);
     });
 
-    $('a[href="#"]').click(function(e) {
+    $('a[href="#top"]').click(function(e) {
         e.preventDefault();
 
         closeMenus();
