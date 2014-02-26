@@ -14,6 +14,10 @@
 | Source: //maps.googleapis.com/maps/api/js?v=3&sensor=false&extension=.js
 |
 */
+
+// Dependency with graceful error checking
+var google = google || null;
+
 var TripCost = (function(google){
 
     // Constructor method
@@ -114,7 +118,16 @@ var TripCost = (function(google){
 
     TripCost.prototype.addVehicle = function(vehicle) {
         this.vehicles.push(vehicle);
+
+        document.dispatchEvent(new CustomEvent('vehicle-added', {'detail': {vehicle: vehicle}}));
+        
         return this.vehicles.length;
+    };
+
+    TripCost.prototype.loadVehicles = function(callback) {
+        
+        self = this;
+        callback();
     };
 
     TripCost.prototype.loading = function(status) {

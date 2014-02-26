@@ -1,10 +1,21 @@
 $(function() {
     $('.dropdown-menu form').click(function(e) { e.stopPropagation(); });
 
+    if ( ! google) {
+        alert('Could not load Google Maps. Exiting...');
+        return;
+    }
+
+    // Main objects and services
     var tripCost = new TripCost('map-canvas', google);
     tripCost.setSpinner('.directions-spinner')
     var fuelEconomy = new FuelEconomy(jQuery);
     fuelEconomy.setSpinner('.add-vehicle-spinner');
+
+    // Persistent storage.
+    // Can swap out for localStorage, cookie, or server interface
+    // Just need to implement methods set(), get(), and delete()
+    var persistentStorage = new Persistence(localStorage);
 
     var directionsForm = {
         start: $('#directions-form input[name="start"]'),
@@ -19,6 +30,18 @@ $(function() {
     directionsForm.start.on('keyup',       function(e) {directionsForm.startError.html('');});
     directionsForm.destination.on('keyup', function(e) {directionsForm.destinationError.html('');});
     directionsForm.vehicle.on('change',     function(e) {directionsForm.vehicleError.html('');});
+
+    // Load vehicles
+    tripCost.loadVehicles(function() {
+
+        var vehicles = persistentStorage.get('vehicles');
+        
+        if (vehicles) {
+            $.each(vehicles, function(index, vehicle) {
+                tripCost.addVehicle(vehicle);
+            });
+        }
+    });
 
     $('#findRoute').click(function(e) {
         e.preventDefault();
@@ -88,7 +111,9 @@ $(function() {
             fuelEconomy.loading(false);
             $('#add-vehicle-modal').modal('hide');
 
-            $('body').trigger('vehicle-added', fuelEconomy.vehicle);
+            tripCost.addVehicle(fuelEconomy.vehicle);
+
+            persistentStorage.pushItem('vehicles', fuelEconomy.vehicle);
         });
     });
 
@@ -112,16 +137,16 @@ $(function() {
         closeMenus();
 
         $('html, body').animate({
-            scrollTop: $("body").offset().top
+            scrollTop: $("html").top
         }, 500);
     });
 
-    $('body').on('vehicle-added', function() {
-
-        var vehicle = fuelEconomy.vehicle;
-        tripCost.addVehicle(vehicle);
-
+    document.addEventListener('vehicle-added', function(event) {
+        var vehicle = event.detail.vehicle;
+        
         $('#directions-form select[name="vehicle"]').append('<option value="' + vehicle.id + '">' + fuelEconomy.vehicleName(vehicle) + '</option>');
+
+        console.log("Adding vehicle: ", vehicle);
     });
 
 });
