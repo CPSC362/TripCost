@@ -11,7 +11,7 @@ $(function() {
 
         // Main objects and services
         var tripCost = new TripCost('map-canvas', google);
-        tripCost.setSpinner('.directions-spinner');
+        tripCost.setSpinner($('.directions-spinner'));
         tripCost.addVehicleMenu($('#directions-form select[name="vehicle"]'));
         var fuelEconomy = new FuelEconomy(Vehicle, jQuery);
         fuelEconomy.setSpinner('.add-vehicle-spinner');
