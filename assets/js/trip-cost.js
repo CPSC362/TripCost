@@ -15,10 +15,7 @@
 |
 */
 
-// Dependency with graceful error checking
-var google = google || null;
-
-var TripCost = (function(google){
+var TripCost = (function(){
 
     // Constructor method
     function TripCost(domId, google) {
@@ -34,6 +31,8 @@ var TripCost = (function(google){
         this.vehicle = null;
 
         this.vehicles = [];
+
+        this._vehicleMenu = [];
 
         this._spinner = null;
 
@@ -119,22 +118,26 @@ var TripCost = (function(google){
     TripCost.prototype.addVehicle = function(vehicle) {
         this.vehicles.push(vehicle);
 
-        document.dispatchEvent(new CustomEvent('vehicle-added', {'detail': {vehicle: vehicle}}));
-        
         return this.vehicles.length;
     };
 
-    TripCost.prototype.loadVehicles = function(callback) {
+    TripCost.prototype.loadVehicles = function(vehicles, callbackWhenFinished) {
         
-        self = this;
-        callback();
+        if (vehicles) {
+            for (var i = 0; i < vehicles.length; ++i) {
+                this.addVehicle(new Vehicle(vehicles[i]));
+            }
+        }
+
+        callbackWhenFinished(this.vehicles);
+
     };
 
     TripCost.prototype.loading = function(status) {
         if (status) {
-            $(this._spinner).removeClass('fa-map-marker').addClass('fa-spinner fa-spin');
+            this._spinner.removeClass('fa-map-marker').addClass('fa-spinner fa-spin');
         } else {
-            $(this._spinner).removeClass('fa-spinner fa-spin').addClass('fa-map-marker');
+            this._spinner.removeClass('fa-spinner fa-spin').addClass('fa-map-marker');
         }
     };
 
@@ -161,4 +164,4 @@ var TripCost = (function(google){
 
     return TripCost;
 
-})(google);
+})();
