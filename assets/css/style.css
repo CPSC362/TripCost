@@ -33,7 +33,8 @@ body {
   pointer-events: none;
 }
 .vehicle-select {
-  font-family: 'FontAwesome', Helvetica;
+  border:none;
+  background-color:white;
 }
 /* ///////////////// */
 
