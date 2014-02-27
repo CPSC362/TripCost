@@ -1,3 +1,5 @@
+var DEBUG = true;
+
 $(function() {
     $('.dropdown-menu form').click(function(e) { e.stopPropagation(); });
 
@@ -9,9 +11,24 @@ $(function() {
 
         // Main objects and services
         var tripCost = new TripCost('map-canvas', google);
-        tripCost.setSpinner('.directions-spinner')
+        tripCost.setSpinner('.directions-spinner');
+        tripCost.addVehicleMenu($('#directions-form select[name="vehicle"]'));
         var fuelEconomy = new FuelEconomy(Vehicle, jQuery);
         fuelEconomy.setSpinner('.add-vehicle-spinner');
+
+        tripCost.addVehicleMenuListener(function(selectMenus, vehicles) {
+            $.each(selectMenus, function(index, selectMenu) {
+                DEBUG && console.log("Erasing all vehicle menu options");
+
+                selectMenu.find('option:not(:eq(0))').remove();
+
+                DEBUG && console.log("Adding vehicles to select menu: ", vehicles);
+
+                $.each(vehicles, function(index, vehicle) {
+                    selectMenu.append($("<option></option>").attr("value", vehicle.vehicleId).text(vehicle.name()));
+                });
+            });
+        });
 
         // Persistent storage.
         // Can swap out for localStorage, cookie, or server interface
@@ -33,17 +50,7 @@ $(function() {
         directionsForm.vehicle.on('change',    function(e) {directionsForm.vehicleError.html('');});
 
         // Load vehicles
-        tripCost.loadVehicles(persistentStorage.get('vehicles'), function(vehicles) {
-            var domElement = $('#directions-form select[name="vehicle"]');
-
-            $(domElement).find('option:not(:eq(0))').remove();
-
-            console.log(vehicles);
-
-            $.each(vehicles, function(index, vehicle) {
-                $(domElement).append($("<option></option>").attr("value", vehicle.vehicleId).text(vehicle.name()));
-            });
-        });
+        tripCost.loadVehicles(persistentStorage.get('vehicles'));
 
         $('#findRoute').click(function(e) {
             e.preventDefault();

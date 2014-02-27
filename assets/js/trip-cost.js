@@ -32,7 +32,9 @@ var TripCost = (function(){
 
         this.vehicles = [];
 
-        this._vehicleMenu = [];
+        this._vehicleMenus = [];
+
+        this._vehicleMenuListener = null;
 
         this._spinner = null;
 
@@ -101,7 +103,7 @@ var TripCost = (function(){
             if (status == self.googleProvider.maps.DirectionsStatus.OK) {
 
                 // Output the result object for reference
-                console.log(result);
+                DEBUG && console.log("Google Maps result: ", result);
 
                 self.directionsDisplay.setDirections(result);
 
@@ -116,21 +118,24 @@ var TripCost = (function(){
     }
 
     TripCost.prototype.addVehicle = function(vehicle) {
+        DEBUG && console.log("Adding vehicle: ", vehicle);
         this.vehicles.push(vehicle);
+
+        if (this._vehicleMenuListener) {
+            this._vehicleMenuListener(this._vehicleMenus, this.vehicles);
+        }
 
         return this.vehicles.length;
     };
 
-    TripCost.prototype.loadVehicles = function(vehicles, callbackWhenFinished) {
+    TripCost.prototype.loadVehicles = function(vehicles) {
+        DEBUG && console.log("Loading " + vehicles.length + " vehicles from persistent storage: ", vehicles.length);
         
         if (vehicles) {
             for (var i = 0; i < vehicles.length; ++i) {
                 this.addVehicle(new Vehicle(vehicles[i]));
             }
         }
-
-        callbackWhenFinished(this.vehicles);
-
     };
 
     TripCost.prototype.loading = function(status) {
@@ -160,6 +165,14 @@ var TripCost = (function(){
             return 'Problem accessing Google Maps';
         if (status == this.googleProvider.maps.DirectionsStatus.UNKNOWN_ERROR)
             return 'Unidentified Google Maps error';
+    };
+
+    TripCost.prototype.addVehicleMenu = function(domSelectElement) {
+        this._vehicleMenus.push(domSelectElement);
+    };
+
+    TripCost.prototype.addVehicleMenuListener = function(callback) {
+        this._vehicleMenuListener = callback;
     };
 
     return TripCost;
