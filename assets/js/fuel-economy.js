@@ -173,7 +173,7 @@ var FuelEconomy = (function(jQuery){
         $(selectMenu).find('option:first-child').text('Choose...');
         $(selectMenu).find('option:not(:eq(0))').remove();
         $.each(data.menuItem, function(index, item) {
-            $(selectMenu).append($("<option></option>").attr("value", item.value).text(item.text)).trigger('change');
+            $(selectMenu).append($("<option></option>").attr("value", item.value).text(item.text));
         });
     };
 
