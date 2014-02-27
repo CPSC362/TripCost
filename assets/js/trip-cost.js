@@ -129,7 +129,10 @@ var TripCost = (function(){
     };
 
     TripCost.prototype.loadVehicles = function(vehicles) {
-        DEBUG && console.log("Loading " + vehicles.length + " vehicles from persistent storage: ", vehicles.length);
+
+        if (vehicles) {
+            DEBUG && console.log("Loading " + vehicles.length + " vehicles from persistent storage: ", vehicles.length);
+        }
         
         if (vehicles) {
             for (var i = 0; i < vehicles.length; ++i) {
