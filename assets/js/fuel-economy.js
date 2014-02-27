@@ -13,19 +13,14 @@
 var FuelEconomy = (function(jQuery){
 
     // Constructor method
-    function FuelEconomy(jQuery) {
+    function FuelEconomy(Vehicle, jQuery) {
         
         // Map jQuery dependency
         this.$ = jQuery;
 
-        this._spinner = null;
+        this.vehicle = new Vehicle();
 
-        this.vehicle = {
-            year: null,
-            make: null,
-            model: null,
-            id: null
-        };
+        this._spinner = null;
 
         this.yearMenuLoaded = false;
 
@@ -156,14 +151,21 @@ var FuelEconomy = (function(jQuery){
     };
 
     FuelEconomy.prototype.saveVehicle = function(formElement, finishCallback) {
+        
+        var self = this;
 
         var form = $(formElement);
 
-        this.vehicle = form.serializeObject();
+        var vehicleProperties = form.serializeObject();
+
+        this.vehicle.year      = vehicleProperties.year;
+        this.vehicle.make      = vehicleProperties.make;
+        this.vehicle.model     = vehicleProperties.model;
+        this.vehicle.vehicleId = vehicleProperties.vehicleId;
 
         // Save vehicle to user account...
 
-        finishCallback();
+        finishCallback(this.vehicle);
     };
 
     FuelEconomy.prototype._populateSelect = function(selectMenu, data) {
@@ -190,10 +192,6 @@ var FuelEconomy = (function(jQuery){
     FuelEconomy.prototype.reset = function(form) {
         $(form).find('select').val('');
     };
-
-    FuelEconomy.prototype.vehicleName = function(theVehicle) {
-        return theVehicle.year + ' ' + theVehicle.make + ' ' + theVehicle.model;
-    }
 
     return FuelEconomy;
 

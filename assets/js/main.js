@@ -9,7 +9,7 @@ $(function() {
     // Main objects and services
     var tripCost = new TripCost('map-canvas', google);
     tripCost.setSpinner('.directions-spinner')
-    var fuelEconomy = new FuelEconomy(jQuery);
+    var fuelEconomy = new FuelEconomy(Vehicle, jQuery);
     fuelEconomy.setSpinner('.add-vehicle-spinner');
 
     // Persistent storage.
@@ -107,13 +107,13 @@ $(function() {
     $('#add-vehicle-save').click(function(e) {
         fuelEconomy.loading(true);
 
-        fuelEconomy.saveVehicle('form#add-vehicle', function() {
+        fuelEconomy.saveVehicle('form#add-vehicle', function(vehicle) {
             fuelEconomy.loading(false);
             $('#add-vehicle-modal').modal('hide');
 
-            tripCost.addVehicle(fuelEconomy.vehicle);
+            tripCost.addVehicle(vehicle);
 
-            persistentStorage.pushItem('vehicles', fuelEconomy.vehicle);
+            persistentStorage.pushItem('vehicles', vehicle);
         });
     });
 
@@ -143,8 +143,8 @@ $(function() {
 
     document.addEventListener('vehicle-added', function(event) {
         var vehicle = event.detail.vehicle;
-        
-        $('#directions-form select[name="vehicle"]').append('<option value="' + vehicle.id + '">' + fuelEconomy.vehicleName(vehicle) + '</option>');
+
+        $('#directions-form select[name="vehicle"]').append('<option value="' + vehicle.vehicleId + '">' + vehicle.name() + '</option>');
 
         console.log("Adding vehicle: ", vehicle);
     });

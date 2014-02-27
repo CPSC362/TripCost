@@ -26,6 +26,7 @@
 <script src="{{url_for('.static', filename='js/trip-cost.js')}}"></script>
 <script src="{{url_for('.static', filename='js/fuel-economy.js')}}"></script>
 <script src="{{url_for('.static', filename='js/persistence.js')}}"></script>
+<script src="{{url_for('.static', filename='js/vehicle.js')}}"></script>
 <script src="{{url_for('.static', filename='js/main.js')}}"></script>
 {% endblock %}
 
@@ -121,7 +122,7 @@
                 <label class="col-sm-2 control-label">Options:</label>
                 <div class="col-sm-10">
                   <p class="form-control-static add-vehicle-options-container">
-                    <select name="id" class="form-control" id="add-vehicle-options"><option value="">None</option></select>
+                    <select name="vehicleId" class="form-control" id="add-vehicle-options"><option value="">None</option></select>
                   </p>
                 </div>
               </div>
