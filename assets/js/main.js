@@ -1,4 +1,4 @@
-var DEBUG = true;
+var DEBUG = false;
 
 $(function() {
     $('.dropdown-menu form').click(function(e) { e.stopPropagation(); });
@@ -15,6 +15,11 @@ $(function() {
         tripCost.addVehicleMenu($('#directions-form select[name="vehicle"]'));
         var fuelEconomy = new FuelEconomy(Vehicle, jQuery);
         fuelEconomy.setSpinner('.add-vehicle-spinner');
+
+        fuelEconomy.menus.year = $('select#add-vehicle-year');
+        fuelEconomy.menus.make = $('select#add-vehicle-make');
+        fuelEconomy.menus.model = $('select#add-vehicle-model');
+        fuelEconomy.menus.options = $('select#add-vehicle-options');
 
         tripCost.addVehicleMenuListener(function(selectMenus, vehicles) {
             $.each(selectMenus, function(index, selectMenu) {
@@ -98,7 +103,7 @@ $(function() {
         }
 
         $('#add-vehicle-modal').on('show.bs.modal', function (e) {
-            fuelEconomy.vehicleYearMenu('select#add-vehicle-year');
+            fuelEconomy.vehicleYearMenu();
         });
 
         $('select#add-vehicle-year').change(function(e) {
@@ -114,10 +119,8 @@ $(function() {
         });
 
         $('#add-vehicle-save').click(function(e) {
-            fuelEconomy.loading(true);
-
             fuelEconomy.saveVehicle('form#add-vehicle', function(vehicle) {
-                fuelEconomy.loading(false);
+                
                 $('#add-vehicle-modal').modal('hide');
 
                 tripCost.addVehicle(vehicle);

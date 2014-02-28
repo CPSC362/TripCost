@@ -49,7 +49,8 @@ var Persistence = (function(){
     Persistence.prototype.pushItem = function(key, value, expiration) {
     	
     	var item = this.get(key) || [];
-        console.log(value);
+
+        DEBUG && console.log(value);
 
     	if (item != null && item instanceof Array) {
     		item.push(value);
