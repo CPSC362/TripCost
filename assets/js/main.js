@@ -1,18 +1,35 @@
 var DEBUG = false;
 
-$.fn.serializeObject=function(){var e={};var t=this.serializeArray();$.each(t,function(){if(e[this.name]){if(!e[this.name].push){e[this.name]=[e[this.name]]}e[this.name].push(this.value||"")}else{e[this.name]=this.value||""}});return e}
+$.fn.serializeObject = function() {
+    var e = {};
+    var t = this.serializeArray();
+    $.each(t, function() {
+        if (e[this.name]) {
+            if (!e[this.name].push) {
+                e[this.name] = [e[this.name]]
+            }
+            e[this.name].push(this.value || "")
+        } else {
+            e[this.name] = this.value || ""
+        }
+    });
+    return e
+}
 
 $(function() {
-    $('.dropdown-menu form').click(function(e) { e.stopPropagation(); });
+    $('.dropdown-menu form').click(function(e) {
+        e.stopPropagation();
+    });
 
     if ($('#map-canvas').length) {
-        if ( ! google) {
+        if (!google) {
             alert('Could not load Google Maps. Exiting...');
             return;
         }
 
         // Main objects and services
         var tripCost = new TripCost('map-canvas', google);
+        tripCost.initialize();
         tripCost.setSpinner($('.directions-spinner'));
         tripCost.addVehicleMenu($('#directions-form select[name="vehicle"]'));
         var fuelEconomy = new FuelEconomy(Vehicle, jQuery);
@@ -52,9 +69,15 @@ $(function() {
             routeError: $('#directions-form .route-error')
         }
 
-        directionsForm.start.on('keyup',       function(e) {directionsForm.startError.html('');});
-        directionsForm.destination.on('keyup', function(e) {directionsForm.destinationError.html('');});
-        directionsForm.vehicle.on('change',    function(e) {directionsForm.vehicleError.html('');});
+        directionsForm.start.on('keyup', function(e) {
+            directionsForm.startError.html('');
+        });
+        directionsForm.destination.on('keyup', function(e) {
+            directionsForm.destinationError.html('');
+        });
+        directionsForm.vehicle.on('change', function(e) {
+            directionsForm.vehicleError.html('');
+        });
 
         // Load vehicles
         tripCost.loadVehicles(persistentStorage.get('vehicles'));
@@ -99,12 +122,12 @@ $(function() {
 
         function closeMenus() {
             $('[data-toggle="dropdown"]').parent().removeClass('open');
-            if ( ! $('.navbar-toggle').hasClass('collapsed')) {
+            if (!$('.navbar-toggle').hasClass('collapsed')) {
                 $('.navbar-toggle').click();
             }
         }
 
-        $('#add-vehicle-modal').on('show.bs.modal', function (e) {
+        $('#add-vehicle-modal').on('show.bs.modal', function(e) {
             fuelEconomy.vehicleYearMenu();
         });
 
@@ -122,7 +145,7 @@ $(function() {
 
         $('#add-vehicle-save').click(function(e) {
             fuelEconomy.saveVehicle('form#add-vehicle', function(vehicle) {
-                
+
                 $('#add-vehicle-modal').modal('hide');
 
                 tripCost.addVehicle(vehicle);
