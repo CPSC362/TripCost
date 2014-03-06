@@ -2,7 +2,7 @@
 var vehicleInstance = new Vehicle();
 
 // Interfaces
-var interfacesCollection = [
+var interfaces = [
     // Vehicle
     {
         interfaceSpecification: new Interface('Vehicle', ['name', 'mpg']),
@@ -15,7 +15,7 @@ var interfacesCollection = [
     },
     // TripCost
     {
-        interfaceSpecification: new Interface('TripCost', ['initialize', 'getDirections', 'addVehicle', 'loadVehicles', 'loading', 'setSpinner', 'errorMessage', 'addVehicleMenu', 'addVehicleMenuListener']),
+        interfaceSpecification: new Interface('TripCost', ['initialize', 'getDirections', 'addVehicle', 'loadVehicles', 'loading', 'setSpinner', 'errorMessage', 'addVehicleMenu', 'addVehicleMenuListener', 'getTripInformation']),
         instance: new TripCost('main', google)
     },
     // Google
@@ -37,7 +37,7 @@ var interfacesCollection = [
 
 
 var domElement = $('#main');
-$.each(interfacesCollection, function(index, interfaceToCheck) {
+$.each(interfaces, function(index, interfaceToCheck) {
 
     var specification = interfaceToCheck.interfaceSpecification;
     var name = specification.name;
