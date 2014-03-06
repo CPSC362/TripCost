@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Interface Checks</title>
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
+
+	<style>
+	.good { color: #008000; }
+	.bad { color: #c20002; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div id="main" class="col-lg-12">
+				<h1>Interfaces:</h1>
+			</div>
+		</div>
+	</div>
+
+	<!-- Classes -->
+	<script src="bower_components/jquery/jquery.min.js"></script>
+	<script src="//maps.googleapis.com/maps/api/js?v=3&sensor=false&extension=.js"></script>
+	<script src="../trip-cost.js"></script>
+	<script src="../fuel-economy.js"></script>
+	<script src="../persistence.js"></script>
+	<script src="../vehicle.js"></script>
+	<script src="../main.js"></script>
+
+	<!-- Interface library -->
+	<script src="interface.js"></script>
+
+	<!-- Interface checking -->
+	<script src="interface-checks.js"></script>
+
+</body>
+</html>
