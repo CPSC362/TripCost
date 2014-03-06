@@ -1,5 +1,7 @@
 var DEBUG = false;
 
+$.fn.serializeObject=function(){var e={};var t=this.serializeArray();$.each(t,function(){if(e[this.name]){if(!e[this.name].push){e[this.name]=[e[this.name]]}e[this.name].push(this.value||"")}else{e[this.name]=this.value||""}});return e}
+
 $(function() {
     $('.dropdown-menu form').click(function(e) { e.stopPropagation(); });
 

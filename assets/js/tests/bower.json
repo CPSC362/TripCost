@@ -1,0 +1,26 @@
+{
+  "name": "tests",
+  "version": "0.0.0",
+  "homepage": "https://github.com/CPSC362/TripCost",
+  "authors": [
+    "Austin White <austingym@gmail.com>"
+  ],
+  "description": "Unit testing for javascript classes used in TripCost",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "2.0.3",
+    "qunit": "~1.14.0",
+    "sinon-qunit": "~1.0.0"
+  },
+  "devDependencies": {
+    "sinonjs-built": "~1.8.2"
+  }
+}

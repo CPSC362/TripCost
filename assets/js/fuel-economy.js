@@ -10,15 +10,15 @@
 | 
 |
 */
-var FuelEconomy = (function(jQuery){
+var FuelEconomy = (function(){
 
     // Constructor method
-    function FuelEconomy(Vehicle, jQuery) {
+    function FuelEconomy(vehicle, jQuery) {
         
         // Map jQuery dependency
         this.$ = jQuery;
 
-        this.vehicle = new Vehicle();
+        this.vehicle = vehicle;
 
         this._spinner = null;
 
@@ -92,133 +92,133 @@ var FuelEconomy = (function(jQuery){
         };
     };
 
-    FuelEconomy.prototype.vehicleYearMenu = function() {
+    FuelEconomy.prototype = {
+        vehicleYearMenu: function() {
 
-        var self = this;
+            var self = this;
 
-        if ( ! this.yearMenuLoaded) {
-            this.getVehicleMenuYear(function(data, textStatus) {
+            if ( ! this.yearMenuLoaded) {
+                this.getVehicleMenuYear(function(data, textStatus) {
+                    if (textStatus == "success") {
+                        self.yearMenuLoaded = true;
+                        self._loading(false);
+                        self._populateSelect(self.menus.year, data);
+                        self._eraseSelection([self.menus.make, self.menus.model, self.menus.options]);
+                    } else {
+                        alert(this.serverError);
+                    }
+                });
+            }
+        },
+
+        vehicleMakeMenu: function(year) {
+
+            this.vehicle.year = year;
+
+            var self = this;
+
+            this.getVehicleMenuMake(function(data, textStatus) {
                 if (textStatus == "success") {
-                    self.yearMenuLoaded = true;
                     self._loading(false);
-                    self._populateSelect(self.menus.year, data);
-                    self._eraseSelection([self.menus.make, self.menus.model, self.menus.options]);
+                    self._populateSelect(self.menus.make, data);
+                    self._eraseSelection([self.menus.model, self.menus.options]);
                 } else {
                     alert(this.serverError);
                 }
             });
-        }
-    };
+        },
 
-    FuelEconomy.prototype.vehicleMakeMenu = function(year) {
+        vehicleModelMenu: function(make) {
 
-        this.vehicle.year = year;
+            this.vehicle.make = make;
 
-        var self = this;
+            var self = this;
 
-        this.getVehicleMenuMake(function(data, textStatus) {
-            if (textStatus == "success") {
-                self._loading(false);
-                self._populateSelect(self.menus.make, data);
-                self._eraseSelection([self.menus.model, self.menus.options]);
-            } else {
-                alert(this.serverError);
-            }
-        });
-    };
-
-    FuelEconomy.prototype.vehicleModelMenu = function(make) {
-
-        this.vehicle.make = make;
-
-        var self = this;
-
-        this.getVehicleMenuModel(function(data, textStatus) {
-            if (textStatus == "success") {
-                self._loading(false);
-                self._populateSelect(self.menus.model, data);
-                self._eraseSelection([self.menus.options]);
-            } else {
-                alert(this.serverError);
-            }
-        });
-    };
-
-    FuelEconomy.prototype.vehicleOptionsMenu = function(model) {
-
-        this.vehicle.model = model;
-
-        var self = this;
-
-        this.getVehicleMenuOptions(function(data, textStatus) {
-            if (textStatus == "success") {
-                self._loading(false);
-                self._populateSelect(self.menus.options, data);
-            } else {
-                alert(this.serverError);
-            }
-        });
-    };
-
-    FuelEconomy.prototype.saveVehicle = function(formElement, finishCallback) {
-        
-        this._loading(true);
-
-        var form = $(formElement);
-
-        var vehicleProperties = form.serializeObject();
-
-        this.vehicle.year      = vehicleProperties.year;
-        this.vehicle.make      = vehicleProperties.make;
-        this.vehicle.model     = vehicleProperties.model;
-        this.vehicle.vehicleId = vehicleProperties.vehicleId;
-
-        // Save vehicle to user account...
-
-        finishCallback(this.vehicle);
-
-        this._loading(false);
-    };
-
-    FuelEconomy.prototype._populateSelect = function(selectMenu, data) {
-        
-        $(selectMenu).find('option:first-child').text('Choose...');
-        $(selectMenu).find('option:not(:eq(0))').remove();
-
-        if (data.menuItem instanceof Array) {
-            $.each(data.menuItem, function(index, item) {
-                $(selectMenu).append($("<option></option>").attr("value", item.value).text(item.text));
+            this.getVehicleMenuModel(function(data, textStatus) {
+                if (textStatus == "success") {
+                    self._loading(false);
+                    self._populateSelect(self.menus.model, data);
+                    self._eraseSelection([self.menus.options]);
+                } else {
+                    alert(this.serverError);
+                }
             });
-        } else {
-            $(selectMenu).append($("<option></option>").attr("value", data.menuItem.value).text(data.menuItem.text));
+        },
+
+        vehicleOptionsMenu: function(model) {
+
+            this.vehicle.model = model;
+
+            var self = this;
+
+            this.getVehicleMenuOptions(function(data, textStatus) {
+                if (textStatus == "success") {
+                    self._loading(false);
+                    self._populateSelect(self.menus.options, data);
+                } else {
+                    alert(this.serverError);
+                }
+            });
+        },
+
+        saveVehicle: function(formElement, finishCallback) {
+            
+            this._loading(true);
+
+            var form = $(formElement);
+
+            var vehicleProperties = form.serializeObject();
+
+            this.vehicle.year      = vehicleProperties.year;
+            this.vehicle.make      = vehicleProperties.make;
+            this.vehicle.model     = vehicleProperties.model;
+            this.vehicle.vehicleId = vehicleProperties.vehicleId;
+
+            // Save vehicle to user account...
+
+            finishCallback(this.vehicle);
+
+            this._loading(false);
+        },
+
+        _populateSelect: function(selectMenu, data) {
+            
+            $(selectMenu).find('option:first-child').text('Choose...');
+            $(selectMenu).find('option:not(:eq(0))').remove();
+
+            if (data.menuItem instanceof Array) {
+                $.each(data.menuItem, function(index, item) {
+                    $(selectMenu).append($("<option></option>").attr("value", item.value).text(item.text));
+                });
+            } else {
+                $(selectMenu).append($("<option></option>").attr("value", data.menuItem.value).text(data.menuItem.text));
+            }
+            
+        },
+
+        _eraseSelection: function(menusToErase) {
+            $.each(menusToErase, function (index, menuToErase) {
+                $(menuToErase).find('option:not(:eq(0))').remove();
+            });
+        },
+
+        _loading: function(status) {
+            if (status) {
+                $(this._spinner).show();
+            } else {
+                $(this._spinner).hide();
+            }
+        },
+
+        setSpinner: function(spinnerElement) {
+            this._spinner = spinnerElement;
+        },
+
+        reset: function(form) {
+            $(form).find('select').val('');
         }
-        
-    };
-
-    FuelEconomy.prototype._eraseSelection = function(menusToErase) {
-        $.each(menusToErase, function (index, menuToErase) {
-            $(menuToErase).find('option:not(:eq(0))').remove();
-        });
-    };
-
-    FuelEconomy.prototype._loading = function(status) {
-        if (status) {
-            $(this._spinner).show();
-        } else {
-            $(this._spinner).hide();
-        }
-    };
-
-    FuelEconomy.prototype.setSpinner = function(spinnerElement) {
-        this._spinner = spinnerElement;
-    };
-
-    FuelEconomy.prototype.reset = function(form) {
-        $(form).find('select').val('');
     };
 
     return FuelEconomy;
 
-})(jQuery);
-
-$.fn.serializeObject=function(){var e={};var t=this.serializeArray();$.each(t,function(){if(e[this.name]){if(!e[this.name].push){e[this.name]=[e[this.name]]}e[this.name].push(this.value||"")}else{e[this.name]=this.value||""}});return e}
+})();
