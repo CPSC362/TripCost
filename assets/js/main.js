@@ -32,7 +32,7 @@ $(function() {
         tripCost.initialize();
         tripCost.setSpinner($('.directions-spinner'));
         tripCost.addVehicleMenu($('#directions-form select[name="vehicle"]'));
-        var fuelEconomy = new FuelEconomy(Vehicle, jQuery);
+        var fuelEconomy = new FuelEconomy(new Vehicle(), jQuery);
         fuelEconomy.setSpinner('.add-vehicle-spinner');
 
         fuelEconomy.menus.year = $('select#add-vehicle-year');

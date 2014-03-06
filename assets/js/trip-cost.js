@@ -115,6 +115,27 @@ var TripCost = (function() {
         });
     }
 
+    TripCost.prototype.getTripInformation = function(params, jQuery) {
+
+        if (params == null || !params.hasOwnProperty('vehicle') || !params.hasOwnProperty('directions')) {
+            throw "getTripInformation() requires a parameter object with vehicle and directions properties";
+        }
+
+        if (!jQuery) {
+            throw "getTripInformation() requires jQuery";
+        }
+
+        jQuery.ajax({
+            url: '/vehicle-information',
+            type: 'get',
+            dataType: 'json',
+            data: params,
+            success: function(data, textStatus) {
+                console.log(data);
+            }
+        });
+    };
+
     TripCost.prototype.addVehicle = function(vehicle) {
         DEBUG && console.log("Adding vehicle: ", vehicle);
         this.vehicles.push(vehicle);
