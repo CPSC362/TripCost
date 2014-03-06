@@ -15,7 +15,7 @@
 |
 */
 
-var TripCost = (function(){
+var TripCost = (function() {
 
     // Constructor method
     function TripCost(domId, google) {
@@ -37,8 +37,6 @@ var TripCost = (function(){
         this._vehicleMenuListener = null;
 
         this._spinner = null;
-
-        this.initialize();
     };
 
     /*
@@ -56,7 +54,7 @@ var TripCost = (function(){
         var self = this;
 
         this.googleProvider.maps.event.addDomListener(window, 'load', function() {
-            
+
             self.directionsService = new self.googleProvider.maps.DirectionsService();
             self.directionsDisplay = new self.googleProvider.maps.DirectionsRenderer();
 
@@ -85,11 +83,11 @@ var TripCost = (function(){
 
         // Preserve reference to instance
         var self = this;
-        
+
         this.directionsDisplay.setMap(this.map);
 
         this.loading(true);
-        
+
         var request = {
             origin: start,
             destination: destination,
@@ -133,7 +131,7 @@ var TripCost = (function(){
         if (vehicles) {
             DEBUG && console.log("Loading " + vehicles.length + " vehicles from persistent storage: ", vehicles.length);
         }
-        
+
         if (vehicles) {
             for (var i = 0; i < vehicles.length; ++i) {
                 this.addVehicle(new Vehicle(vehicles[i]));
