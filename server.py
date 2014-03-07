@@ -74,6 +74,45 @@ def vehicle_options():
     req = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/menu/options', params=vehicle, headers={'Accept': 'application/json'})
     return jsonify(req.json()), req.status_code
 
+@app.route('/calc-trip-cost')
+def calc_trip_cost():
+	vehicle = request.args.get('vehicle')
+	directions = requests.args.get('google')
+	
+	#get request objects from fueleconomy.gov
+	reqvehicle = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/' + str(vehicle['id']), headers={'Accept': 'application/json'})
+	reqsharedmpg = requests.get('http://www.fueleconomy.gov/ws/rest/ympg/shared/ympgVehicle/' + str(vehicle['id']), headers={'Accept': 'application/json'})
+	reqgasprice = requests.get('http://www.fueleconomy.gov/ws/rest/fuelprices', headers={'Accept': 'application/json'})
+	
+	#get json from request objects
+	vehicleinfo = reqvehicle.json()
+	sharedmpginfo = reqsharedmpg.json()
+	gaspriceinfo = reqgasprice.json()
+	
+	#get combined mpg for fueltype 1
+	mpg = float(vehicleinfo['comb08U'])
+	
+	#get average user submitted mpg
+	sharedmpg = float(sharedmpginfo['avgMpg'])
+	
+	#determine fuel type to find gas price
+	fueltype = str(vehicleinfo['fuelType1']).lower().split(' ',1)[0]
+	
+	#use fueltype to find national average price for that type of fuel.
+	gasprice = float(gaspriceinfo[fueltype])
+	
+	#this is just placeholder. Don't know if there needs to be any setup to get this number.
+	distance=directions['distance']
+	
+	#calc tripcost using epa estimate
+	epatripcost = (distance/mpg)*gasprice
+	
+	#calc tripcost using shared data
+	sharedtripcost = (distance/sharedmpg)*gasprice
+	
+	#not sure if this is the right way to do this...
+	tripcost = {'epa':epatripcost, 'shared':sharedtripcost}
+	return jsonify(tripcost)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
