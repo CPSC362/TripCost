@@ -89,14 +89,23 @@ def calc_trip_cost():
     
     #get json from request objects
     vehicleInfo = reqVehicle.json()
-    sharedMpgInfo = reqSharedMpg.json()
+
+    epaTripCost    = 0
+    sharedTripCost = 0
+
+    if reqSharedMpg.content is not "":
+        sharedMpgInfo = reqSharedMpg.json()
+        
+        #get average user submitted mpg
+        sharedMpg = float(sharedMpgInfo['avgMpg'])
+
+        #calc tripcost using shared data
+        sharedTripCost = (distance / sharedMpg) * gasPrice
+
     gasPriceInfo = reqGasPrice.json()
     
     #get combined mpg for fueltype 1
     mpg = float(vehicleInfo['comb08U']) or float(vehicleInfo['comb08'])
-
-    #get average user submitted mpg
-    sharedMpg = float(sharedMpgInfo['avgMpg'])
     
     #determine fuel type to find gas price
     fuelType = str(vehicleInfo['fuelType1']).lower().split(' ', 1)[0]
@@ -116,12 +125,15 @@ def calc_trip_cost():
     
     #calc tripcost using epa estimate
     epaTripCost = (distance / mpg) * gasPrice
+
+    tripCost = {}
+
+    if epaTripCost is not 0:
+        tripCost['epa'] = epaTripCost
+
+    if sharedTripCost is not 0:
+        tripCost['shared'] = sharedTripCost
     
-    #calc tripcost using shared data
-    sharedTripCost = (distance / sharedMpg) * gasPrice
-    
-    #not sure if this is the right way to do this...
-    tripCost = {'epa': epaTripCost, 'shared': sharedTripCost}
     return jsonify(tripCost)
 
 if __name__ == '__main__':

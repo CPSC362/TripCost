@@ -24,6 +24,7 @@
 {% block scripts %}
 {{super()}}
 <script src="//maps.googleapis.com/maps/api/js?v=3&sensor=false&extension=.js"></script>
+<script src="{{url_for('.static', filename='js/handlebars-v1.3.0.js')}}"></script>
 <script src="{{url_for('.static', filename='js/trip-cost.js')}}"></script>
 <script src="{{url_for('.static', filename='js/fuel-economy.js')}}"></script>
 <script src="{{url_for('.static', filename='js/persistence.js')}}"></script>
@@ -112,4 +113,18 @@
       </div>
     </div>
   </div>
+
+  <script type="text/x-handlebars-template" id="results-template">
+  {% raw %}
+  <ul>
+    {{#if epa}}
+    <li>EPA Estimated Cost: <strong>${{epa}}</strong></li>
+    {{/if}}
+    {{#if shared}}
+    <li>Shared Data Cost: <strong>${{shared}}</strong></li>
+    {{/if}}
+  </ul>
+  {% endraw %}
+  </script>
+
 {% endblock %}

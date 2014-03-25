@@ -147,7 +147,9 @@ $(function() {
                         method: 'post',
                         type: 'json',
                         success: function(data) {
-                            $('#results').html('<ul><li>EPA Estimated Cost: <strong>$' + data.epa + '</strong></li><li>Shared Data Cost: <strong>$' + data.shared + '</strong></li></ul>');
+                            var template = Handlebars.compile($('#results-template').html());
+
+                            $('#results').html(template(data));
                         }
                     });
 
