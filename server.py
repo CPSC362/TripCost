@@ -5,6 +5,7 @@ from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
 from flaskext.gravatar import Gravatar
 
+import json
 import requests
 
 # from flask_wtf import Form, RecaptchaField
@@ -13,6 +14,8 @@ import requests
 # from wtforms.validators import Required
 
 #initialization
+
+METERS_TO_MILES = 0.000621371
 
 configFile = None
 
@@ -74,45 +77,52 @@ def vehicle_options():
     req = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/menu/options', params=vehicle, headers={'Accept': 'application/json'})
     return jsonify(req.json()), req.status_code
 
-@app.route('/calc-trip-cost')
+@app.route('/calc-trip-cost', methods=['POST'])
 def calc_trip_cost():
-	vehicle = request.args.get('vehicle')
-	directions = requests.args.get('google')
-	
-	#get request objects from fueleconomy.gov
-	reqvehicle = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/' + str(vehicle['id']), headers={'Accept': 'application/json'})
-	reqsharedmpg = requests.get('http://www.fueleconomy.gov/ws/rest/ympg/shared/ympgVehicle/' + str(vehicle['id']), headers={'Accept': 'application/json'})
-	reqgasprice = requests.get('http://www.fueleconomy.gov/ws/rest/fuelprices', headers={'Accept': 'application/json'})
-	
-	#get json from request objects
-	vehicleinfo = reqvehicle.json()
-	sharedmpginfo = reqsharedmpg.json()
-	gaspriceinfo = reqgasprice.json()
-	
-	#get combined mpg for fueltype 1
-	mpg = float(vehicleinfo['comb08U'])
-	
-	#get average user submitted mpg
-	sharedmpg = float(sharedmpginfo['avgMpg'])
-	
-	#determine fuel type to find gas price
-	fueltype = str(vehicleinfo['fuelType1']).lower().split(' ',1)[0]
-	
-	#use fueltype to find national average price for that type of fuel.
-	gasprice = float(gaspriceinfo[fueltype])
-	
-	#this is just placeholder. Don't know if there needs to be any setup to get this number.
-	distance=directions['distance']
-	
-	#calc tripcost using epa estimate
-	epatripcost = (distance/mpg)*gasprice
-	
-	#calc tripcost using shared data
-	sharedtripcost = (distance/sharedmpg)*gasprice
-	
-	#not sure if this is the right way to do this...
-	tripcost = {'epa':epatripcost, 'shared':sharedtripcost}
-	return jsonify(tripcost)
+    vehicle = request.form['vehicle']
+    directions = json.loads(request.form['trip'])
+    
+    #get request objects from fueleconomy.gov
+    reqVehicle = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/' + str(vehicle), headers={'Accept': 'application/json'})
+    reqSharedMpg = requests.get('http://www.fueleconomy.gov/ws/rest/ympg/shared/ympgVehicle/' + str(vehicle), headers={'Accept': 'application/json'})
+    reqGasPrice = requests.get('http://www.fueleconomy.gov/ws/rest/fuelprices', headers={'Accept': 'application/json'})
+    
+    #get json from request objects
+    vehicleInfo = reqVehicle.json()
+    sharedMpgInfo = reqSharedMpg.json()
+    gasPriceInfo = reqGasPrice.json()
+    
+    #get combined mpg for fueltype 1
+    mpg = float(vehicleInfo['comb08U']) or float(vehicleInfo['comb08'])
+
+    #get average user submitted mpg
+    sharedMpg = float(sharedMpgInfo['avgMpg'])
+    
+    #determine fuel type to find gas price
+    fuelType = str(vehicleInfo['fuelType1']).lower().split(' ', 1)[0]
+
+    #use fueltype to find national average price for that type of fuel.
+    gasPrice = float(gasPriceInfo[fuelType])
+    
+    #this is just placeholder. Don't know if there needs to be any setup to get this number.
+    distance = 0
+
+    for route in directions['routes']:
+        for leg in route['legs']:
+            distance += leg['distance']['value']
+
+    distance = distance * METERS_TO_MILES
+    print distance
+    
+    #calc tripcost using epa estimate
+    epaTripCost = (distance / mpg) * gasPrice
+    
+    #calc tripcost using shared data
+    sharedTripCost = (distance / sharedMpg) * gasPrice
+    
+    #not sure if this is the right way to do this...
+    tripCost = {'epa': epaTripCost, 'shared': sharedTripCost}
+    return jsonify(tripCost)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

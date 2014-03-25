@@ -109,10 +109,55 @@ $(function() {
 
             tripCost.getDirections($('#start').val(), $('#destination').val(), {
                 success: function(trip) {
+
+                    // Clear any lasting validation errors
+                    directionsForm.routeError.html('');
+
+                    // Show results interface button
                     $('#results-button').fadeIn();
+
+                    // Close all active menus
                     closeMenus();
 
+                    // Copy the object
+                    var tripCopy = JSON.parse(JSON.stringify(trip));
+
+                    // Modify the object to reduce payload size
+                    delete tripCopy.routes[0].overview_path;
+                    delete tripCopy.routes[0].overview_polyline;
+
+                    for (var i = 0; i < tripCopy.routes[0].legs[0].steps.length; ++i) {
+                        var step = tripCopy.routes[0].legs[0].steps[i];
+
+                        delete step.lat_lngs;
+                        delete step.path;
+                        delete step.polyline;
+                        delete step.encoded_lat_lngs;
+                    }
+
+                    console.log(tripCopy);
+
                     // Process results
+                    $.ajax({
+                        url: '/calc-trip-cost',
+                        data: {
+                            trip: JSON.stringify(tripCopy),
+                            vehicle: tripCost.vehicle
+                        },
+                        method: 'post',
+                        type: 'json',
+                        success: function(data) {
+                            $('#results').html('<ul><li>EPA Estimated Cost: <strong>$' + data.epa + '</strong></li><li>Shared Data Cost: <strong>$' + data.shared + '</strong></li></ul>');
+                        }
+                    });
+
+
+                    // $.post('/calc-trip-cost', {
+                    //     trip: trip,
+                    //     vehicle: tripCost.vehicle
+                    // }).done(function(data) {
+                    //     console.log(data);
+                    // });
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));

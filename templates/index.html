@@ -7,6 +7,7 @@
 {% block head %}
 {{ super() }}
 {{ fixes.ie8() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename='img/tripcost.png') }}">
 {% endblock %}
 
 {% block metas %}
@@ -34,33 +35,6 @@
     
   {% include 'nav.html' %}
 
-  <!-- <div class="form-container">
-    
-    <form action="" method="get">
-      
-      <div class="form-group">
-
-        <div class="form-header">
-          <div>
-            <h2>Get Directions</h2>
-            <button type="button" class="close" style="display:block">&times;</button>
-          </div>
-        </div>
-        
-        <div class="left-inner-addon">
-          <i class="fa fa-location-arrow"></i>
-          <input type="text" name="start" id="start" placeholder="Start..." class="form-control input-lg" />
-        </div>
-
-        <div class="left-inner-addon">
-          <i class="fa fa-crosshairs"></i>
-          <input type="text" name="destination" id="destination" placeholder="Destination..." class="form-control input-lg" />
-        </div>
-
-      </div>
-
-    </form> -->
-
   </div>
 
   <div id="map-canvas"></div>
@@ -73,8 +47,8 @@
     </div>
 
     <div class="row">
-      <div class="col-md-6">
-        blah
+      <div class="col-md-6" id="results">
+        
       </div>
     </div>
   </div>
