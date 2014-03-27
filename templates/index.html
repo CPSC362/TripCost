@@ -118,10 +118,10 @@
   {% raw %}
   <ul>
     {{#if epa}}
-    <li>EPA Estimated Cost: <strong>${{epa}}</strong></li>
+    <li>EPA Estimated Cost: <strong>${{formatMoney epa}}</strong></li>
     {{/if}}
     {{#if shared}}
-    <li>Shared Data Cost: <strong>${{shared}}</strong></li>
+    <li>Shared Data Cost: <strong>${{formatMoney shared}}</strong></li>
     {{/if}}
   </ul>
   {% endraw %}
