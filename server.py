@@ -94,6 +94,17 @@ def calc_trip_cost():
     epaTripCost    = 0
     sharedTripCost = 0
 
+    gasPriceInfo = reqGasPrice.json()
+    
+    #get combined mpg for fueltype 1
+    mpg = float(vehicleInfo['comb08U']) or float(vehicleInfo['comb08'])
+    
+    #determine fuel type to find gas price
+    fuelType = str(vehicleInfo['fuelType1']).lower().split(' ', 1)[0]
+
+    #use fueltype to find national average price for that type of fuel.
+    gasPrice = float(gasPriceInfo[fuelType])
+
     #this is just placeholder. Don't know if there needs to be any setup to get this number.
     distance = 0
 
@@ -112,17 +123,6 @@ def calc_trip_cost():
 
         #calc tripcost using shared data
         sharedTripCost = (distance / sharedMpg) * gasPrice
-
-    gasPriceInfo = reqGasPrice.json()
-    
-    #get combined mpg for fueltype 1
-    mpg = float(vehicleInfo['comb08U']) or float(vehicleInfo['comb08'])
-    
-    #determine fuel type to find gas price
-    fuelType = str(vehicleInfo['fuelType1']).lower().split(' ', 1)[0]
-
-    #use fueltype to find national average price for that type of fuel.
-    gasPrice = float(gasPriceInfo[fuelType])
     
     #calc tripcost using epa estimate
     epaTripCost = (distance / mpg) * gasPrice
