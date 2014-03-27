@@ -22,6 +22,7 @@ configFile = None
 app = Flask(__name__, static_folder='assets')
 AppConfig(app, configFile)
 app.config['BOOTSTRAP_SERVE_LOCAL'] = True
+app.debug = True
 
 # Gravatar initialization
 gravatar = Gravatar(app,
