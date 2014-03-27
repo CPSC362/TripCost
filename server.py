@@ -93,6 +93,16 @@ def calc_trip_cost():
     epaTripCost    = 0
     sharedTripCost = 0
 
+    #this is just placeholder. Don't know if there needs to be any setup to get this number.
+    distance = 0
+
+    for route in directions['routes']:
+        for leg in route['legs']:
+            distance += leg['distance']['value']
+
+    distance = distance * METERS_TO_MILES
+    print distance
+
     if reqSharedMpg.content is not "":
         sharedMpgInfo = reqSharedMpg.json()
         
@@ -112,16 +122,6 @@ def calc_trip_cost():
 
     #use fueltype to find national average price for that type of fuel.
     gasPrice = float(gasPriceInfo[fuelType])
-    
-    #this is just placeholder. Don't know if there needs to be any setup to get this number.
-    distance = 0
-
-    for route in directions['routes']:
-        for leg in route['legs']:
-            distance += leg['distance']['value']
-
-    distance = distance * METERS_TO_MILES
-    print distance
     
     #calc tripcost using epa estimate
     epaTripCost = (distance / mpg) * gasPrice
