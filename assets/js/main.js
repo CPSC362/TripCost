@@ -105,7 +105,8 @@ $(function() {
 
             if (problem) return;
 
-            tripCost.vehicle = directionsForm.vehicle.find(':selected').val();
+            // Assign vehicle to trip
+            tripCost.vehicle = tripCost.findVehicle(directionsForm.vehicle.find(':selected').val());
 
             tripCost.getDirections($('#start').val(), $('#destination').val(), {
                 success: function(trip) {
@@ -142,7 +143,7 @@ $(function() {
                         url: '/calc-trip-cost',
                         data: {
                             trip: JSON.stringify(tripCopy),
-                            vehicle: tripCost.vehicle
+                            vehicle: JSON.stringify(tripCost.vehicle)
                         },
                         method: 'post',
                         type: 'json',

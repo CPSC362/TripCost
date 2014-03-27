@@ -80,12 +80,12 @@ def vehicle_options():
 
 @app.route('/calc-trip-cost', methods=['POST'])
 def calc_trip_cost():
-    vehicle = request.form['vehicle']
+    vehicle = json.loads(request.form['vehicle'])
     directions = json.loads(request.form['trip'])
     
     #get request objects from fueleconomy.gov
-    reqVehicle = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/' + str(vehicle), headers={'Accept': 'application/json'})
-    reqSharedMpg = requests.get('http://www.fueleconomy.gov/ws/rest/ympg/shared/ympgVehicle/' + str(vehicle), headers={'Accept': 'application/json'})
+    reqVehicle = requests.get('http://www.fueleconomy.gov/ws/rest/vehicle/' + str(vehicle['vehicleId']), headers={'Accept': 'application/json'})
+    reqSharedMpg = requests.get('http://www.fueleconomy.gov/ws/rest/ympg/shared/ympgVehicle/' + str(vehicle['vehicleId']), headers={'Accept': 'application/json'})
     reqGasPrice = requests.get('http://www.fueleconomy.gov/ws/rest/fuelprices', headers={'Accept': 'application/json'})
     
     #get json from request objects

@@ -149,6 +149,18 @@ var TripCost = (function() {
             return this.vehicles.length;
         },
 
+        findVehicle: function(vehicleId) {
+            DEBUG && console.log("Finding vehicle: " + vehicleId);
+
+            for (var i = 0, s = this.vehicles.length; i < s; ++i) {
+                if (this.vehicles[i].vehicleId == vehicleId) {
+                    return this.vehicles[i];
+                }
+            }
+
+            return null;
+        },
+
         loadVehicles: function(vehicles) {
 
             if (vehicles) {
