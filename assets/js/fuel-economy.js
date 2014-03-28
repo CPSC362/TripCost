@@ -137,69 +137,51 @@ var FuelEconomy = (function() {
             });
         },
 
+        showVehiclePreview: function(VehicleClass, callbackWhenFinished) {
+
+            var options = {
+                styleId: this._vehicleMetadata.vehicleId
+            };
+
+            var returnData = {
+                url: null,
+                description: this._vehicleMetadata.year + ' ' + this._vehicleMetadata.make + ' ' + this._vehicleMetadata.model
+            };
+
+            this.edmundsAPI.api('/v1/api/vehiclephoto/service/findphotosbystyleid', options, function(vehicleMediaInformationResponse) {
+
+                var baseUrl = 'http://media.ed.edmunds-media.com';
+
+                for (var i = 0, s = vehicleMediaInformationResponse.length; i < s; ++i) {
+                    if (vehicleMediaInformationResponse[i].subType == 'exterior' &&
+                        vehicleMediaInformationResponse[i].shotTypeAbbreviation == 'FQ') {
+
+                        returnData.url = baseUrl + VehicleClass.prototype.optimalImageSrc(vehicleMediaInformationResponse[i].photoSrcs, 'th');
+                    }
+                }
+
+                callbackWhenFinished(returnData);
+            }, function() {
+                // Failure
+                callbackWhenFinished(returnData);
+            });
+        },
+
+        getVehicleMetadata: function() {
+            return this._vehicleMetadata;
+        },
+
         setVehicleMetadata: function(key, value) {
             this._vehicleMetadata[key] = value;
         },
 
-        assembleVehicle: function(callbackWhenFinished) {
-
-            var self = this;
-
-            var options = {
-                equipmentType: 'OTHER',
-                name: 'Specifications'
-            };
-
-            this.edmundsAPI.api('/api/vehicle/v2/styles/' + this._vehicleMetadata.vehicleId + '/equipment', options, function(vehicleInformationResponse) {
-                self.vehicle = new Vehicle(self._vehicleMetadata);
-
-                var responseAttributes = vehicleInformationResponse.equipment[0].attributes;
-
-                self.vehicle.egeHighwayMpg = parseFloat(self._searchAttributes(responseAttributes, "Ege Highway Mpg", 0));
-                self.vehicle.egeCityMpg = parseFloat(self._searchAttributes(responseAttributes, "Ege City Mpg", 9));
-                self.vehicle.egeCombinedMpg = parseFloat(self._searchAttributes(responseAttributes, "Ege Combined Mpg", 6));
-
-                self.vehicle.epaHighwayMpg = parseFloat(self._searchAttributes(responseAttributes, "Epa Highway Mpg", 7));
-                self.vehicle.epaCityMpg = parseFloat(self._searchAttributes(responseAttributes, "Epa City Mpg", 2));
-                self.vehicle.epaCombinedMpg = parseFloat(self._searchAttributes(responseAttributes, "Epa Combined Mpg", 1));
-
-                self.vehicle.fuelCapacity = parseFloat(self._searchAttributes(responseAttributes, "Fuel Capacity", 8));
-
-                callbackWhenFinished();
-            });
-        },
-
-        _searchAttributes: function(attributes, key, hint) {
-
-            if (attributes[hint].name == key) {
-                return attributes[hint].value;
-            } else {
-                for (var i = 0, s = attributes.length; i < s; ++i) {
-                    if (attributes[i].name == key) {
-                        return attributes[i].value;
-                    }
-                }
-
-                return null;
-            }
-        },
-
-        saveVehicle: function(formElement, finishCallback) {
+        saveVehicle: function(vehicle, finishCallback) {
 
             this._loading(true);
 
-            var form = $(formElement);
-
-            var vehicleProperties = form.serializeObject();
-
-            this.vehicle.year = vehicleProperties.year;
-            this.vehicle.make = vehicleProperties.make;
-            this.vehicle.model = vehicleProperties.model;
-            this.vehicle.vehicleId = vehicleProperties.vehicleId;
-
             // Save vehicle to user account...
 
-            finishCallback(this.vehicle);
+            finishCallback();
 
             this._loading(false);
         },

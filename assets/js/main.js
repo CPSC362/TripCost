@@ -121,6 +121,12 @@ $(function() {
         // Load vehicles
         tripCost.loadVehicles(persistentStorage.get('vehicles'));
 
+        if (tripCost.vehicles.length == 0) {
+            simpleHandlebarsCompiler('#vehicle-list-template', {
+                vehicles: []
+            }, listMenu);
+        }
+
         $('#findRoute').click(function(e) {
             e.preventDefault();
 
@@ -183,7 +189,9 @@ $(function() {
 
                     simpleHandlebarsCompiler('#results-template', {
                         epa: epaCost,
-                        ege: egeCost
+                        ege: egeCost,
+                        mainImage: tripCost.vehicle.mainImage,
+                        name: tripCost.vehicle.name
                     }, '#results');
                 },
                 error: function(result, status) {
@@ -222,13 +230,19 @@ $(function() {
 
         $('select#add-vehicle-options').change(function(e) {
             fuelEconomy.setVehicleMetadata('vehicleId', $(e.target).val());
+
+            fuelEconomy.showVehiclePreview(Vehicle, function(data) {
+                simpleHandlebarsCompiler('#vehicle-preview-template', data, 'div.add-vehicle-preview div.image-thumbnail');
+            })
         });
 
         $('#add-vehicle-save').click(function(e) {
 
-            fuelEconomy.assembleVehicle(function() {
+            tripCost.vehicle = new Vehicle(fuelEconomy.getVehicleMetadata());
 
-                fuelEconomy.saveVehicle('form#add-vehicle', function(vehicle) {
+            tripCost.vehicle.assembleVehicle(edmunds, function(vehicle) {
+
+                fuelEconomy.saveVehicle(vehicle, function() {
 
                     $('#add-vehicle-modal').modal('hide');
 

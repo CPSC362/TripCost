@@ -106,6 +106,13 @@
                 </div>
               </div>
 
+              <div class="add-vehicle-preview">
+                <label class="col-sm-2 control-label">Preview:</label>
+                <div class="col-sm-4 image-thumbnail">
+                  
+                </div>
+              </div>
+
             </div>
           </form>
         </div>
@@ -121,6 +128,11 @@
 
   <script type="text/x-handlebars-template" id="results-template">
   {% raw %}
+  <h3>{{ name }}</h3>
+  
+  <a href="#" class="thumbnail">
+    <img src="{{ mainImage }}" alt="{{ name }}">
+  </a>
   <ul>
     {{#if epa}}
     <li>EPA Estimated Cost: <strong>${{formatMoney epa}}</strong></li>
@@ -144,12 +156,22 @@
   </li>
   {{/each}}
 
+  {{#if vehicles.length }}
   <li class="divider"></li>
+  {{/if}}
 
   <li>
     <a data-toggle="modal" data-target="#add-vehicle-modal" href="#"><i class="fa fa-plus"></i> Add Vehicle</a>
   </li>
-  
+
+  {% endraw %}
+  </script>
+
+  <script type="text/x-handlebars-template" id="vehicle-preview-template">
+  {% raw %}
+  <a href="#" class="thumbnail">
+    <img src="{{ url }}" alt="{{ description }}">
+  </a>
   {% endraw %}
   </script>
 

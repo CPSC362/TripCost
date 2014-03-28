@@ -53,6 +53,99 @@ var Vehicle = (function() {
 
         delete: function() {
 
+        },
+
+        assembleVehicle: function(edmundsAPI, callbackWhenFinished) {
+
+            var self = this;
+
+            var specificationOptions = {
+                equipmentType: 'OTHER',
+                name: 'Specifications'
+            };
+
+            var mediaOptions = {
+                styleId: this.vehicleId
+            };
+
+            var asyncSpecifications = edmundsAPI.api('/api/vehicle/v2/styles/' + this.vehicleId + '/equipment', specificationOptions, function(vehicleInformationResponse) {
+
+                var responseAttributes = vehicleInformationResponse.equipment[0].attributes;
+                console.log(vehicleInformationResponse, responseAttributes);
+
+                self.egeHighwayMpg = parseFloat(self._searchAttributes(responseAttributes, "Ege Highway Mpg", 0));
+                self.egeCityMpg = parseFloat(self._searchAttributes(responseAttributes, "Ege City Mpg", 9));
+                self.egeCombinedMpg = parseFloat(self._searchAttributes(responseAttributes, "Ege Combined Mpg", 6));
+
+                self.epaHighwayMpg = parseFloat(self._searchAttributes(responseAttributes, "Epa Highway Mpg", 7));
+                self.epaCityMpg = parseFloat(self._searchAttributes(responseAttributes, "Epa City Mpg", 2));
+                self.epaCombinedMpg = parseFloat(self._searchAttributes(responseAttributes, "Epa Combined Mpg", 1));
+
+                self.fuelCapacity = parseFloat(self._searchAttributes(responseAttributes, "Fuel Capacity", 8));
+            });
+
+            // Note: v1
+            var asyncMedia = edmundsAPI.api('/v1/api/vehiclephoto/service/findphotosbystyleid', mediaOptions, function(vehicleMediaInformationResponse) {
+
+                var baseUrl = 'http://media.ed.edmunds-media.com';
+
+                for (var i = 0, s = vehicleMediaInformationResponse.length; i < s; ++i) {
+                    if (vehicleMediaInformationResponse[i].subType == 'exterior' &&
+                        vehicleMediaInformationResponse[i].shotTypeAbbreviation == 'FQ') {
+
+                        self.mainImage = baseUrl + self.optimalImageSrc(vehicleMediaInformationResponse[i].photoSrcs, 'lg');
+                    }
+                }
+            });
+
+            $.when(asyncSpecifications, asyncMedia).done(function(specifications, media) {
+                console.log("Done with 2 async calls...", specifications, media);
+
+                callbackWhenFinished(self);
+            });
+        },
+
+        optimalImageSrc: function(photoSrcs, size) {
+
+            console.log(photoSrcs);
+
+            size = (size != undefined) ? size : 'md';
+
+            var numSize;
+
+            if (size == 'lg') {
+                numSize = '500';
+            } else if (size == 'md') {
+                numSize = '400';
+            } else if (size == 'sm') {
+                numSize = '276';
+            } else if (size == 'th') {
+                numSize = '131';
+            }
+
+            for (var i = 0, s = photoSrcs.length; i < s; ++i) {
+                if (photoSrcs[i].indexOf('_' + numSize + '.jpg') != -1) {
+                    console.log("Found photo size (" + size + "): " + numSize, photoSrcs[i]);
+                    return photoSrcs[i];
+                }
+            }
+
+            return photoSrcs[0];
+        },
+
+        _searchAttributes: function(attributes, key, hint) {
+
+            if (attributes[hint].name == key) {
+                return attributes[hint].value;
+            } else {
+                for (var i = 0, s = attributes.length; i < s; ++i) {
+                    if (attributes[i].name == key) {
+                        return attributes[i].value;
+                    }
+                }
+
+                return null;
+            }
         }
     };
 
