@@ -22,36 +22,37 @@ var Vehicle = (function() {
 
     };
 
-    Vehicle.prototype.restore = function(objectAttributes) {
-        for (var property in objectAttributes) {
-            if (this.hasOwnProperty(property)) {
-                this[property] = objectAttributes[property];
+    Vehicle.prototype = {
+        restore: function(objectAttributes) {
+            for (var property in objectAttributes) {
+                if (this.hasOwnProperty(property)) {
+                    this[property] = objectAttributes[property];
+                }
             }
-        }
-    };
+        },
 
-    Vehicle.prototype.name = function() {
+        name: function() {
 
-        if (this.makeFriendlyName && this.modelFriendlyName && this.year) {
-            return this.year + ' ' + this.makeFriendlyName + ' ' + this.modelFriendlyName;
-        } else if (this.year && this.make && this.model) {
-            return this.year + ' ' + this.make + ' ' + this.model;
-        } else {
-            return '';
-        }
+            if (this.makeFriendlyName && this.modelFriendlyName && this.year) {
+                return this.year + ' ' + this.makeFriendlyName + ' ' + this.modelFriendlyName;
+            } else if (this.year && this.make && this.model) {
+                return this.year + ' ' + this.make + ' ' + this.model;
+            } else {
+                return '';
+            }
 
-    };
+        },
 
-    Vehicle.prototype.mpg = function(first_argument) {
-        // body...
-    };
+        maxRange: function(meters) {
+            if (meters) {
+                return this.epaCombinedMpg * this.fuelCapacity * 1609.34;
+            } else {
+                return this.epaCombinedMpg * this.fuelCapacity;
+            }
+        },
 
-    Vehicle.prototype.maxRange = function(meters) {
-        console.log(this);
-        if (meters) {
-            return this.epaCombinedMpg * this.fuelCapacity * 1609.34;
-        } else {
-            return this.epaCombinedMpg * this.fuelCapacity;
+        delete: function() {
+
         }
     };
 

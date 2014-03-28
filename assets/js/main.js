@@ -1,4 +1,4 @@
-var DEBUG = false;
+var DEBUG = true;
 
 $.fn.serializeObject = function() {
     var e = {};
@@ -26,6 +26,12 @@ Handlebars.registerHelper("formatMoney", function(number) {
     return sign + (j ? i.substr(0, j) + commaSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + commaSeparator) + (decimalPlaces ? decimalSeparator + Math.abs(number - i).toFixed(decimalPlaces).slice(2) : "");
 });
 
+function simpleHandlebarsCompiler(templateSelector, data, outputSelector) {
+    var template = Handlebars.compile($(templateSelector).html());
+
+    $(outputSelector).html(template(data));
+};
+
 $(function() {
     $('.dropdown-menu form').click(function(e) {
         e.stopPropagation();
@@ -41,13 +47,16 @@ $(function() {
 
         // Main objects and services
         var tripCost = new TripCost('map-canvas', google);
-        tripCost.initialize(function() {
 
+        tripCost.initialize(function() {
             // after initialization...
             markerGenerator = new MarkerGenerator(google, tripCost.map);
         });
+
         tripCost.setSpinner($('.directions-spinner'));
-        tripCost.addVehicleMenu($('#directions-form select[name="vehicle"]'));
+
+        var selectMenu = $('#directions-form select[name="vehicle"]');
+        var listMenu = $('#nav-vehicle-list');
 
         var edmunds = new EDMUNDSAPI('qgtgm3apuq3fjkbfnzmmksnt');
 
@@ -59,18 +68,29 @@ $(function() {
         fuelEconomy.menus.model = $('select#add-vehicle-model');
         fuelEconomy.menus.options = $('select#add-vehicle-options');
 
-        tripCost.addVehicleMenuListener(function(selectMenus, vehicles) {
-            $.each(selectMenus, function(index, selectMenu) {
-                DEBUG && console.log("Erasing all vehicle menu options");
+        tripCost.addVehicleMenuListener(function(vehicles) {
+            DEBUG && console.log("Erasing all vehicle menu options");
 
-                selectMenu.find('option:not(:eq(0))').remove();
+            // Select menu listener (used for choosing vehicle in distance calculation)
+            selectMenu.find('option:not(:eq(0))').remove();
 
-                DEBUG && console.log("Adding vehicles to select menu: ", vehicles);
+            DEBUG && console.log("Adding vehicles to select menu: ", vehicles);
 
-                $.each(vehicles, function(index, vehicle) {
-                    selectMenu.append($("<option></option>").attr("value", vehicle.vehicleId).text(vehicle.name()));
-                });
+            $.each(vehicles, function(index, vehicle) {
+                selectMenu.append($("<option></option>").attr("value", vehicle.vehicleId).text(vehicle.name()));
             });
+
+            // List of available vehicles in navigation bar
+            simpleHandlebarsCompiler('#vehicle-list-template', {
+                vehicles: vehicles
+            }, listMenu);
+        });
+
+
+        tripCost.addDeleteVehicleMenuListener(function(vehicle) {
+            console.log(vehicle);
+            selectMenu.find('option[value=' + vehicle.vehicleId + ']').remove();
+            listMenu.find('li[data-vehicle-id=' + vehicle.vehicleId + ']').remove();
         });
 
         // Persistent storage.
@@ -161,12 +181,10 @@ $(function() {
 
                     markerGenerator.routeHandler(trip, maxRange);
 
-                    var template = Handlebars.compile($('#results-template').html());
-
-                    $('#results').html(template({
+                    simpleHandlebarsCompiler('#results-template', {
                         epa: epaCost,
                         ege: egeCost
-                    }));
+                    }, '#results');
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));
@@ -245,13 +263,46 @@ $(function() {
             }, 500);
         });
 
-        document.body.addEventListener('vehicle-added', function(event) {
-            var vehicle = event.detail.vehicle;
+        $('#nav-vehicle-list a').click(function(e) {
+            e.preventDefault();
 
-            $('#directions-form select[name="vehicle"]').append('<option value="' + vehicle.vehicleId + '">' + vehicle.name() + '</option>');
+            var vehicleId = $(e.target).parents('li').attr('data-vehicle-id');
 
-            console.log("Adding vehicle: ", vehicle);
-        }, false);
+            if ($(e.target).hasClass('close')) {
+                DEBUG && console.log('Deleting vehicle ' + vehicleId + '...');
+
+                if (confirm('Are you sure you wish to delete the vehicle?')) {
+
+                    tripCost.deleteVehicle(vehicleId, function(vehicle) {
+
+                        // Delete from persistence
+                        persistentStorage.searchAndDelete('vehicles', function(vehicle) {
+                            // Test if the persisted object's vehicleId is the same as the target vehicleId
+                            return (parseInt(vehicle.vehicleId) == parseInt(vehicleId));
+                        });
+
+                        if (tripCost.isActiveVehicle(vehicle)) {
+
+                            // Vehicle is set as the active vehicle
+                            tripCost.vehicle = null;
+
+                            if (tripCost.routed) {
+
+                                // Clear the map markers off the display
+                                markerGenerator.clearMarkers();
+
+                                // Clear the directions off the display
+                                tripCost.directionsDisplay.setMap(null);
+
+                                // Re-initialize the directions display
+                                tripCost.directionsDisplay = new google.maps.DirectionsRenderer();
+                            }
+                        }
+                    });
+                }
+            } else {
+                DEBUG && console.log('Editing vehicle ' + vehicleId + '...');
+            }
+        });
     }
-
 });

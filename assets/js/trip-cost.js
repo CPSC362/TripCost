@@ -24,6 +24,10 @@ var TripCost = (function() {
 
         this.googleProvider = google;
 
+        this.directionsService = null;
+
+        this.directionsDisplay = null;
+
         this.map = null;
 
         this.polyline = null;
@@ -38,7 +42,9 @@ var TripCost = (function() {
 
         this._vehicleMenus = [];
 
-        this._vehicleMenuListener = null;
+        this._vehicleMenuListeners = new Array();
+
+        this._deleteVehicleMenuListeners = new Array();
 
         this._spinner = null;
     };
@@ -151,8 +157,10 @@ var TripCost = (function() {
             DEBUG && console.log("Adding vehicle: ", vehicle);
             this.vehicles.push(vehicle);
 
-            if (this._vehicleMenuListener) {
-                this._vehicleMenuListener(this._vehicleMenus, this.vehicles);
+            if (this._vehicleMenuListeners.length) {
+                for (var i = 0, s = this._vehicleMenuListeners.length; i < s; ++i) {
+                    this._vehicleMenuListeners[i](this.vehicles);
+                }
             }
 
             return this.vehicles.length;
@@ -220,7 +228,53 @@ var TripCost = (function() {
         },
 
         addVehicleMenuListener: function(callback) {
-            this._vehicleMenuListener = callback;
+            this._vehicleMenuListeners.push(callback);
+        },
+
+        addDeleteVehicleMenuListener: function(callback) {
+            this._deleteVehicleMenuListeners.push(callback);
+        },
+
+        deleteVehicle: function(vehicleId, callbackWhenDeleteFinished) {
+
+            var theVehicle;
+
+            for (var i = 0, s = this.vehicles.length; i < s; ++i) {
+                if (this.vehicles[i].vehicleId == vehicleId) {
+                    theVehicle = this.vehicles[i];
+                    break;
+                }
+            }
+
+            if ( !! theVehicle) {
+
+                // Remove the vehicle from the array
+                this.vehicles.splice(i, 1);
+
+                for (var i = 0, s = this._deleteVehicleMenuListeners.length; i < s; ++i) {
+                    console.log(theVehicle);
+                    this._deleteVehicleMenuListeners[i](theVehicle);
+                }
+
+                callbackWhenDeleteFinished(theVehicle);
+
+            }
+        },
+
+        getVehicleById: function(vehicleId) {
+
+            for (var i = 0, s = this.vehicles.length; i < s; ++i) {
+                if (this.vehicles[i].vehicleId == vehicleId) {
+                    return this.vehicles[i];
+                    break;
+                }
+            }
+
+            return null;
+        },
+
+        isActiveVehicle: function(vehicle) {
+            return (parseInt(this.vehicle.vehicleId) == parseInt(vehicle.vehicleId));
         },
 
         getMap: function() {

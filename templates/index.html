@@ -132,4 +132,25 @@
   {% endraw %}
   </script>
 
+  <script type="text/x-handlebars-template" id="vehicle-list-template">
+  {% raw %}
+  
+  {{#each vehicles}}
+  <li data-vehicle-id="{{ vehicleId }}">
+    <a href="#" id="edit-vehicle-{{ vehicleId }}">
+      {{ name }}
+      <span class="close link-close">&times;</span>
+    </a>
+  </li>
+  {{/each}}
+
+  <li class="divider"></li>
+
+  <li>
+    <a data-toggle="modal" data-target="#add-vehicle-modal" href="#"><i class="fa fa-plus"></i> Add Vehicle</a>
+  </li>
+  
+  {% endraw %}
+  </script>
+
 {% endblock %}

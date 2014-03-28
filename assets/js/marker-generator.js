@@ -90,8 +90,6 @@ var MarkerGenerator = (function() {
                         polyline.getPath().push(nextSegment[k]);
                         bounds.extend(nextSegment[k]);
                     }
-
-                    console.log(bounds);
                 }
             }
 
@@ -143,6 +141,18 @@ var MarkerGenerator = (function() {
             });
 
             return marker;
+        },
+
+        clearMarkers: function() {
+
+            var marker = this.gMarkers.pop();
+
+            while (marker != undefined) {
+                console.log("Clearing marker...");
+                marker.setMap(null);
+                marker = this.gMarkers.pop();
+            }
+
         }
     };
 

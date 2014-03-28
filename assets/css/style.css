@@ -8,6 +8,14 @@ body {
   padding:0;
 }
 
+.link-close {
+  line-height:.9;
+}
+
+#nav-vehicle-list {
+  width: 250px;
+}
+
 .container-pushed {
   margin-top:50px;
   padding-top:15px;
