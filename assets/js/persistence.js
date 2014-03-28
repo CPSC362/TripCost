@@ -17,71 +17,109 @@ var Persistence = (function() {
         this.adapter = storageInterface;
     };
 
-    Persistence.prototype.get = function(key) {
-        var item = JSON.parse(this.adapter.getItem(key));
+    Persistence.prototype = {
 
-        if (!item) return null;
+        /**
+         * Get an item by key from persistent storage
+         * @param  {string} key
+         * @return {mixed}
+         */
+        get: function(key) {
+            var item = JSON.parse(this.adapter.getItem(key));
 
-        if (item.timestamp < 0 || new Date().getTime() < item.timestamp) {
-            return JSON.parse(item.value);
-        } else {
-            return this.delete(key);
-        }
-    };
+            if (!item) return null;
 
-    Persistence.prototype.set = function(key, value, expiration) {
+            if (item.timestamp < 0 || new Date().getTime() < item.timestamp) {
+                return JSON.parse(item.value);
+            } else {
+                return this.delete(key);
+            }
+        },
 
-        var expiration = (expiration) ? expiration * 60 * 1000 : -1;
+        /**
+         * Set an item by key in persistent storage
+         * @param {string} key
+         * @param {mixed} value          Can contain primitive types, arrays, or objects
+         * @param {integer} expiration   Expiration timestamp in terms of seconds (or -1 for infinite)
+         */
+        set: function(key, value, expiration) {
 
-        var item = {
-            value: JSON.stringify(value),
-            timestamp: (expiration > 0) ? new Date().getTime() + expiration : expiration
-        };
+            var expiration = (expiration) ? expiration * 60 * 1000 : -1;
 
-        this.adapter.setItem(key, JSON.stringify(item));
-    };
+            var item = {
+                value: JSON.stringify(value),
+                timestamp: (expiration > 0) ? new Date().getTime() + expiration : expiration
+            };
 
-    Persistence.prototype.delete = function(key) {
-        this.adapter.removeItem(key);
-        return null;
-    };
+            this.adapter.setItem(key, JSON.stringify(item));
+        },
 
-    Persistence.prototype.pushItem = function(key, value, expiration) {
+        /**
+         * Delete an item from persistent storage
+         * @param  {string} key
+         * @return {void}
+         */
+        delete: function(key) {
+            this.adapter.removeItem(key);
+        },
 
-        var item = this.get(key) || [];
+        /**
+         * Push an something onto an array item within persistent storage
+         * @param  {string} key
+         * @param  {mixed} value          Can contain primitive types, arrays, or objects
+         * @param  {integer} expiration   Expiration timestamp in terms of seconds (or -1 for infinite)
+         * @return {void}
+         */
+        pushItem: function(key, value, expiration) {
 
-        DEBUG && console.log(value);
+            var item = this.get(key) || [];
 
-        if (item != null && item instanceof Array) {
-            item.push(value);
-            this.set(key, item, expiration);
-        }
-    };
+            DEBUG && console.log(value);
 
-    Persistence.prototype.deleteAt = function(key, index, expiration) {
+            if (item != null && item instanceof Array) {
+                item.push(value);
+                this.set(key, item, expiration);
+            }
+        },
 
-        var item = this.get(key);
+        /**
+         * Delete a member of an array item within persistent storage
+         * @param  {string} key
+         * @param  {integer} index
+         * @param  {integer} expiration   Expiration timestamp in terms of seconds (or -1 for infinite)
+         * @return {void}
+         */
+        deleteAt: function(key, index, expiration) {
 
-        console.log("deleting " + key + " at " + index);
+            var item = this.get(key);
 
-        if (item != null && item instanceof Array) {
-            item.splice(index, 1);
+            console.log("deleting " + key + " at " + index);
 
-            this.set(key, item, expiration);
-        }
-    };
+            if (item != null && item instanceof Array) {
+                item.splice(index, 1);
 
-    Persistence.prototype.searchAndDelete = function(key, predicate) {
-        var objects = this.get(key);
+                this.set(key, item, expiration);
+            }
+        },
 
-        if (objects) {
-            for (var i = 0, s = objects.length; i < s; ++i) {
-                if (predicate(objects[i])) {
-                    this.deleteAt(key, i);
+        /**
+         * Search through an array item using a predicate (closure) for the test and delete it
+         * @param  {string} key
+         * @param  {function} predicate    Function that returns a boolean
+         * @return {void}
+         */
+        searchAndDelete: function(key, predicate) {
+            var objects = this.get(key);
+
+            if (objects) {
+                for (var i = 0, s = objects.length; i < s; ++i) {
+                    if (predicate(objects[i])) {
+                        this.deleteAt(key, i);
+                    }
                 }
             }
         }
-    }
+    };
 
     return Persistence;
 
