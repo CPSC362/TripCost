@@ -49,7 +49,9 @@ $(function() {
         tripCost.setSpinner($('.directions-spinner'));
         tripCost.addVehicleMenu($('#directions-form select[name="vehicle"]'));
 
-        var fuelEconomy = new FuelEconomy(new Vehicle(), jQuery);
+        var edmunds = new EDMUNDSAPI('qgtgm3apuq3fjkbfnzmmksnt');
+
+        var fuelEconomy = new FuelEconomy(jQuery, edmunds);
         fuelEconomy.setSpinner('.add-vehicle-spinner');
 
         fuelEconomy.menus.year = $('select#add-vehicle-year');
@@ -137,43 +139,34 @@ $(function() {
                     // Close all active menus
                     closeMenus();
 
-                    // Copy the object
-                    var tripCopy = JSON.parse(JSON.stringify(trip));
+                    var distance = 0;
 
-                    // Modify the object to reduce payload size
-                    delete tripCopy.routes[0].overview_path;
-                    delete tripCopy.routes[0].overview_polyline;
+                    var gasPrice = 3.90;
 
-                    for (var i = 0; i < tripCopy.routes[0].legs[0].steps.length; ++i) {
-                        var step = tripCopy.routes[0].legs[0].steps[i];
+                    console.log(trip);
 
-                        delete step.lat_lngs;
-                        delete step.path;
-                        delete step.polyline;
-                        delete step.encoded_lat_lngs;
+                    for (var i = 0, s = trip.routes.length; i < s; ++i) {
+                        for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
+                            distance += trip.routes[i].legs[j].distance.value;
+                        }
                     }
 
-                    console.log(tripCopy);
+                    distanceInMiles = distance * 0.000621371;
 
-                    // Process results
-                    $.ajax({
-                        url: '/calc-trip-cost',
-                        data: {
-                            trip: JSON.stringify(tripCopy),
-                            vehicle: JSON.stringify(tripCost.vehicle)
-                        },
-                        method: 'post',
-                        type: 'json',
-                        success: function(data) {
+                    var epaCost = (distance / tripCost.vehicle.epaCombinedMpg) * gasPrice;
+                    var egeCost = (distance / tripCost.vehicle.egeCombinedMpg) * gasPrice;
 
-                            // 300 miles. Placeholder until we get a vehicle's maximum distance
-                            markerGenerator.routeHandler(trip, 482803);
+                    // Assign a default in case the vehicle's range is 0
+                    var maxRange = tripCost.vehicle.maxRange(true) || 300.0;
 
-                            var template = Handlebars.compile($('#results-template').html());
+                    markerGenerator.routeHandler(trip, maxRange);
 
-                            $('#results').html(template(data));
-                        }
-                    });
+                    var template = Handlebars.compile($('#results-template').html());
+
+                    $('#results').html(template({
+                        epa: epaCost,
+                        ege: egeCost
+                    }));
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));
@@ -193,25 +186,38 @@ $(function() {
         });
 
         $('select#add-vehicle-year').change(function(e) {
-            fuelEconomy.vehicleMakeMenu($(e.target).val(), 'select#add-vehicle-make');
+            fuelEconomy.setVehicleMetadata('year', $(e.target).val());
+            fuelEconomy.vehicleMakeMenu();
         });
 
         $('select#add-vehicle-make').change(function(e) {
-            fuelEconomy.vehicleModelMenu($(e.target).val(), 'select#add-vehicle-model');
+            fuelEconomy.setVehicleMetadata('make', $(e.target).val());
+            fuelEconomy.setVehicleMetadata('makeFriendlyName', $(e.target).find('option:selected').text());
+            fuelEconomy.vehicleModelMenu();
         });
 
         $('select#add-vehicle-model').change(function(e) {
-            fuelEconomy.vehicleOptionsMenu($(e.target).val(), 'select#add-vehicle-options');
+            fuelEconomy.setVehicleMetadata('model', $(e.target).val());
+            fuelEconomy.setVehicleMetadata('modelFriendlyName', $(e.target).find('option:selected').text());
+            fuelEconomy.vehicleOptionsMenu();
+        });
+
+        $('select#add-vehicle-options').change(function(e) {
+            fuelEconomy.setVehicleMetadata('vehicleId', $(e.target).val());
         });
 
         $('#add-vehicle-save').click(function(e) {
-            fuelEconomy.saveVehicle('form#add-vehicle', function(vehicle) {
 
-                $('#add-vehicle-modal').modal('hide');
+            fuelEconomy.assembleVehicle(function() {
 
-                tripCost.addVehicle(vehicle);
+                fuelEconomy.saveVehicle('form#add-vehicle', function(vehicle) {
 
-                persistentStorage.pushItem('vehicles', vehicle);
+                    $('#add-vehicle-modal').modal('hide');
+
+                    tripCost.addVehicle(vehicle);
+
+                    persistentStorage.pushItem('vehicles', vehicle);
+                });
             });
         });
 

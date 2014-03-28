@@ -1,3 +1,6 @@
 [submodule "assets/js/vendor/edmunds-javascript-sdk"]
 	path = assets/js/vendor/edmunds-javascript-sdk
 	url = git@github.com:edmunds/edmunds-javascript-sdk.git
+[submodule "assets/js/vendor/EdmundsAPI-sdk-javascript"]
+	path = assets/js/vendor/EdmundsAPI-sdk-javascript
+	url = git@github.com:EdmundsAPI/sdk-javascript.git

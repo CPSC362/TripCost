@@ -27,10 +27,12 @@
 <script src="{{url_for('.static', filename='js/vendor/handlebars-v1.3.0.js')}}"></script>
 <script src="{{url_for('.static', filename='js/vendor/v3_epoly.js')}}"></script>
 <script src="{{url_for('.static', filename='js/marker-generator.js')}}"></script>
+<script src="{{url_for('.static', filename='js/vendor/EdmundsAPI-sdk-javascript/edmunds.api.sdk.js')}}"></script>
 <script src="{{url_for('.static', filename='js/trip-cost.js')}}"></script>
+<script src="{{url_for('.static', filename='js/vehicle.js')}}"></script>
+<!-- fuel-economy.js dependency: vehicle.js -->
 <script src="{{url_for('.static', filename='js/fuel-economy.js')}}"></script>
 <script src="{{url_for('.static', filename='js/persistence.js')}}"></script>
-<script src="{{url_for('.static', filename='js/vehicle.js')}}"></script>
 <script src="{{url_for('.static', filename='js/main.js')}}"></script>
 {% endblock %}
 
@@ -103,6 +105,7 @@
                   </p>
                 </div>
               </div>
+
             </div>
           </form>
         </div>
@@ -123,7 +126,7 @@
     <li>EPA Estimated Cost: <strong>${{formatMoney epa}}</strong></li>
     {{/if}}
     {{#if shared}}
-    <li>Shared Data Cost: <strong>${{formatMoney shared}}</strong></li>
+    <li>EGE Estimated Cost: <strong>${{formatMoney ege}}</strong></li>
     {{/if}}
   </ul>
   {% endraw %}

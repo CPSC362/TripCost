@@ -178,7 +178,10 @@ var TripCost = (function() {
 
             if (vehicles) {
                 for (var i = 0; i < vehicles.length; ++i) {
-                    this.addVehicle(new Vehicle(vehicles[i]));
+                    var v = new Vehicle();
+                    v.restore(vehicles[i]);
+
+                    this.addVehicle(v);
                 }
             }
         },
