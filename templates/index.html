@@ -24,7 +24,9 @@
 {% block scripts %}
 {{super()}}
 <script src="//maps.googleapis.com/maps/api/js?v=3&sensor=false&extension=.js"></script>
-<script src="{{url_for('.static', filename='js/handlebars-v1.3.0.js')}}"></script>
+<script src="{{url_for('.static', filename='js/vendor/handlebars-v1.3.0.js')}}"></script>
+<script src="{{url_for('.static', filename='js/vendor/v3_epoly.js')}}"></script>
+<script src="{{url_for('.static', filename='js/marker-generator.js')}}"></script>
 <script src="{{url_for('.static', filename='js/trip-cost.js')}}"></script>
 <script src="{{url_for('.static', filename='js/fuel-economy.js')}}"></script>
 <script src="{{url_for('.static', filename='js/persistence.js')}}"></script>
@@ -33,7 +35,7 @@
 {% endblock %}
 
 {% block content %}
-    
+
   {% include 'nav.html' %}
 
   </div>
@@ -49,7 +51,7 @@
 
     <div class="row">
       <div class="col-md-6" id="results">
-        
+
       </div>
     </div>
   </div>
@@ -64,7 +66,7 @@
         </div>
         <div class="modal-body">
           <form action="#" method="post" class="form-horizontal" id="add-vehicle">
-            
+
             <div class="form-group">
               <div class="add-vehicle-year">
                 <label class="col-sm-2 control-label">Year:</label>

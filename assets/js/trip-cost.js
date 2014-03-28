@@ -24,6 +24,10 @@ var TripCost = (function() {
 
         this.googleProvider = google;
 
+        this.map = null;
+
+        this.polyline = null;
+
         this.routed = false;
 
         this.trip = null;
@@ -50,7 +54,7 @@ var TripCost = (function() {
         | and initialize the location to the CSUF campus.
         |
         */
-        initialize: function() {
+        initialize: function(callbackWhenFinished) {
 
             // Preserve reference to instance
             var self = this;
@@ -69,6 +73,8 @@ var TripCost = (function() {
                     center: calStateFullerton,
                     mapTypeId: self.googleProvider.maps.MapTypeId.ROADMAP
                 });
+
+                callbackWhenFinished();
             });
         },
 
@@ -106,6 +112,9 @@ var TripCost = (function() {
                     DEBUG && console.log("Google Maps result: ", result);
 
                     self.directionsDisplay.setDirections(result);
+
+                    // var summaryPanel = document.getElementById("directions_panel");
+                    // directionsDisplay.setPanel(summaryPanel);
 
                     self.trip = result;
                     self.routed = true;
@@ -209,6 +218,10 @@ var TripCost = (function() {
 
         addVehicleMenuListener: function(callback) {
             this._vehicleMenuListener = callback;
+        },
+
+        getMap: function() {
+            return this.map;
         }
     };
 

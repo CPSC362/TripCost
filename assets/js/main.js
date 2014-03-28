@@ -37,11 +37,18 @@ $(function() {
             return;
         }
 
+        var markerGenerator;
+
         // Main objects and services
         var tripCost = new TripCost('map-canvas', google);
-        tripCost.initialize();
+        tripCost.initialize(function() {
+
+            // after initialization...
+            markerGenerator = new MarkerGenerator(google, tripCost.map);
+        });
         tripCost.setSpinner($('.directions-spinner'));
         tripCost.addVehicleMenu($('#directions-form select[name="vehicle"]'));
+
         var fuelEconomy = new FuelEconomy(new Vehicle(), jQuery);
         fuelEconomy.setSpinner('.add-vehicle-spinner');
 
@@ -158,19 +165,15 @@ $(function() {
                         method: 'post',
                         type: 'json',
                         success: function(data) {
+
+                            // 300 miles. Placeholder until we get a vehicle's maximum distance
+                            markerGenerator.routeHandler(trip, 482803);
+
                             var template = Handlebars.compile($('#results-template').html());
 
                             $('#results').html(template(data));
                         }
                     });
-
-
-                    // $.post('/calc-trip-cost', {
-                    //     trip: trip,
-                    //     vehicle: tripCost.vehicle
-                    // }).done(function(data) {
-                    //     console.log(data);
-                    // });
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));
