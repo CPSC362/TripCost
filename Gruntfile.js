@@ -6,7 +6,6 @@ module.exports = function(grunt) {
             css: {
                 src: [
                     'assets/css/vendor/bootstrap.css',
-                    'assets/css/vendor/bootstrap-theme.css',
                     'assets/css/style.css'
                 ],
                 dest: 'assets/css/combined.css'
