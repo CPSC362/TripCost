@@ -15,25 +15,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 {% endblock %}
 
-{% block styles -%}
-{{super()}}
+{% block styles %}
 <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-<link href="{{url_for('.static', filename='css/style.css')}}" rel="stylesheet">
+<link href="{{url_for('.static', filename='css/combined.min.css')}}" rel="stylesheet">
 {% endblock styles %}
 
 {% block scripts %}
 {{super()}}
 <script src="//maps.googleapis.com/maps/api/js?v=3&sensor=false&extension=.js"></script>
-<script src="{{url_for('.static', filename='js/vendor/handlebars-v1.3.0.js')}}"></script>
-<script src="{{url_for('.static', filename='js/vendor/v3_epoly.js')}}"></script>
-<script src="{{url_for('.static', filename='js/marker-generator.js')}}"></script>
-<script src="{{url_for('.static', filename='js/vendor/EdmundsAPI-sdk-javascript/edmunds.api.sdk.js')}}"></script>
-<script src="{{url_for('.static', filename='js/trip-cost.js')}}"></script>
-<script src="{{url_for('.static', filename='js/vehicle.js')}}"></script>
-<!-- fuel-economy.js dependency: vehicle.js -->
-<script src="{{url_for('.static', filename='js/fuel-economy.js')}}"></script>
-<script src="{{url_for('.static', filename='js/persistence.js')}}"></script>
-<script src="{{url_for('.static', filename='js/main.js')}}"></script>
+<script src="{{url_for('.static', filename='js/dist/combined.min.js')}}"></script>
 {% endblock %}
 
 {% block content %}
