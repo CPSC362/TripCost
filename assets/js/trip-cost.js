@@ -187,6 +187,8 @@ var TripCost = (function() {
             if (vehicles) {
                 for (var i = 0; i < vehicles.length; ++i) {
                     var v = new Vehicle();
+
+                    DEBUG && console.log("Vehicle from storage: ", vehicles[i]);
                     v.restore(vehicles[i]);
 
                     this.addVehicle(v);

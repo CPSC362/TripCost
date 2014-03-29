@@ -179,20 +179,22 @@ $(function() {
 
                     distanceInMiles = distance * 0.000621371;
 
-                    var epaCost = (distance / tripCost.vehicle.epaCombinedMpg) * gasPrice;
-                    var egeCost = (distance / tripCost.vehicle.egeCombinedMpg) * gasPrice;
+                    var epaCost = (distanceInMiles / tripCost.vehicle.epaCombinedMpg) * gasPrice;
+                    var egeCost = (distanceInMiles / tripCost.vehicle.egeCombinedMpg) * gasPrice;
 
                     // Assign a default in case the vehicle's range is 0
-                    var maxRange = tripCost.vehicle.maxRange(true) || 300.0;
+                    var maxRange = tripCost.vehicle.maxRange(true) || 482803.0;
 
                     markerGenerator.routeHandler(trip, maxRange);
+
+                    console.log("Vehicle for route: ", tripCost.vehicle);
 
                     simpleHandlebarsCompiler('#results-template', {
                         epa: epaCost,
                         ege: egeCost,
                         mainImage: tripCost.vehicle.mainImage,
                         name: tripCost.vehicle.name
-                    }, '#results');
+                    }, '#results-container');
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));
@@ -310,6 +312,9 @@ $(function() {
 
                                 // Re-initialize the directions display
                                 tripCost.directionsDisplay = new google.maps.DirectionsRenderer();
+
+                                // Erase results
+                                $('#results-container').html('');
                             }
                         }
                     });

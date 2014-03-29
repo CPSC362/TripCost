@@ -139,6 +139,10 @@ body {
   display:none;
 }
 
+.cost-analysis {
+  font-size: 20px;
+}
+
 .vehicle-select-error {
   
 }

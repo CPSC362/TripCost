@@ -20,6 +20,8 @@ var Vehicle = (function() {
 
         this.fuelCapacity = 0;
 
+        this.mainImage = null;
+
     };
 
     Vehicle.prototype = {
@@ -68,7 +70,8 @@ var Vehicle = (function() {
                 styleId: this.vehicleId
             };
 
-            var asyncSpecifications = edmundsAPI.api('/api/vehicle/v2/styles/' + this.vehicleId + '/equipment', specificationOptions, function(vehicleInformationResponse) {
+            // Nested asynchronous calls. Possible improvement using deferred objects
+            edmundsAPI.api('/api/vehicle/v2/styles/' + this.vehicleId + '/equipment', specificationOptions, function(vehicleInformationResponse) {
 
                 var responseAttributes = vehicleInformationResponse.equipment[0].attributes;
                 console.log(vehicleInformationResponse, responseAttributes);
@@ -82,27 +85,27 @@ var Vehicle = (function() {
                 self.epaCombinedMpg = parseFloat(self._searchAttributes(responseAttributes, "Epa Combined Mpg", 1));
 
                 self.fuelCapacity = parseFloat(self._searchAttributes(responseAttributes, "Fuel Capacity", 8));
-            });
 
-            // Note: v1
-            var asyncMedia = edmundsAPI.api('/v1/api/vehiclephoto/service/findphotosbystyleid', mediaOptions, function(vehicleMediaInformationResponse) {
 
-                var baseUrl = 'http://media.ed.edmunds-media.com';
+                // Note: v1
+                edmundsAPI.api('/v1/api/vehiclephoto/service/findphotosbystyleid', mediaOptions, function(vehicleMediaInformationResponse) {
 
-                for (var i = 0, s = vehicleMediaInformationResponse.length; i < s; ++i) {
-                    if (vehicleMediaInformationResponse[i].subType == 'exterior' &&
-                        vehicleMediaInformationResponse[i].shotTypeAbbreviation == 'FQ') {
+                    var baseUrl = 'http://media.ed.edmunds-media.com';
 
-                        self.mainImage = baseUrl + self.optimalImageSrc(vehicleMediaInformationResponse[i].photoSrcs, 'lg');
+                    for (var i = 0, s = vehicleMediaInformationResponse.length; i < s; ++i) {
+                        if (vehicleMediaInformationResponse[i].subType == 'exterior' &&
+                            vehicleMediaInformationResponse[i].shotTypeAbbreviation == 'FQ') {
+
+                            self.mainImage = baseUrl + self.optimalImageSrc(vehicleMediaInformationResponse[i].photoSrcs, 'lg');
+                        }
                     }
-                }
+
+                    console.log("Done with 2 async calls...");
+
+                    callbackWhenFinished(self);
+                });
             });
 
-            $.when(asyncSpecifications, asyncMedia).done(function(specifications, media) {
-                console.log("Done with 2 async calls...", specifications, media);
-
-                callbackWhenFinished(self);
-            });
         },
 
         optimalImageSrc: function(photoSrcs, size) {

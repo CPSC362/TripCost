@@ -139,6 +139,10 @@ var FuelEconomy = (function() {
 
         showVehiclePreview: function(VehicleClass, callbackWhenFinished) {
 
+            this._loading(true);
+
+            var self = this;
+
             var options = {
                 styleId: this._vehicleMetadata.vehicleId
             };
@@ -159,6 +163,8 @@ var FuelEconomy = (function() {
                         returnData.url = baseUrl + VehicleClass.prototype.optimalImageSrc(vehicleMediaInformationResponse[i].photoSrcs, 'th');
                     }
                 }
+
+                self._loading(false);
 
                 callbackWhenFinished(returnData);
             }, function() {

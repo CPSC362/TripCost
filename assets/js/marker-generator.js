@@ -23,19 +23,27 @@ var MarkerGenerator = (function() {
             new this.googleProvider.maps.Point(9, 34)
         );
 
-        this.iconImage = new this.googleProvider.maps.MarkerImage('/assets/img/marker_red.png',
-            // This marker is 20 pixels wide by 34 pixels tall.
-            new this.googleProvider.maps.Size(20, 34),
-            // The origin for this image is 0,0.
+        this.icons["green"] = new this.googleProvider.maps.MarkerImage('/assets/img/green-marker.png',
+            new this.googleProvider.maps.Size(40, 64),
+
             new this.googleProvider.maps.Point(0, 0),
-            // The anchor for this image is at 9,34.
-            new this.googleProvider.maps.Point(9, 34));
-        this.iconShadow = new this.googleProvider.maps.MarkerImage('http://www.google.com/mapfiles/shadow50.png',
-            // The shadow image is larger in the horizontal dimension
-            // while the position and offset are the same as for the main image.
-            new this.googleProvider.maps.Size(37, 34),
+
+            new this.googleProvider.maps.Point(10, 32),
+
+            new this.googleProvider.maps.Size(20, 32)
+        );
+
+        this.icons["magenta"] = new this.googleProvider.maps.MarkerImage('/assets/img/magenta-marker.png',
+            new this.googleProvider.maps.Size(40, 64),
+
             new this.googleProvider.maps.Point(0, 0),
-            new this.googleProvider.maps.Point(9, 34));
+
+            new this.googleProvider.maps.Point(10, 32),
+
+            new this.googleProvider.maps.Size(20, 32)
+        );
+
+
 
         this.iconShape = {
             coord: [9, 0, 6, 1, 4, 2, 2, 4, 0, 8, 0, 12, 1, 14, 2, 16, 5, 19, 7, 23, 8, 26, 9, 30, 9, 34, 11, 34, 11, 30, 12, 26, 13, 24, 14, 21, 16, 18, 18, 16, 20, 12, 20, 8, 18, 4, 16, 2, 15, 1, 13, 0],
@@ -94,7 +102,8 @@ var MarkerGenerator = (function() {
             }
 
             for (var i = 0; i < polyline.Distance(); i += maxVehicleDistance) {
-                if (i != 0) this.createMarker(polyline.GetPointAtDistance(i), "200km", "200km");
+                // TODO: Set to correct distance
+                if (i != 0) this.createMarker(polyline.GetPointAtDistance(i), "200km", "200km", "magenta");
             }
         },
 
