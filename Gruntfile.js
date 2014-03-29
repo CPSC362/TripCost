@@ -13,6 +13,8 @@ module.exports = function(grunt) {
 
             js: {
                 src: [
+                    'assets/js/vendor/jquery-2.0.3.js',
+                    'assets/js/vendor/bootstrap.js',
                     'assets/js/vendor/handlebars-v1.3.0.js',
                     'assets/js/vendor/v3_epoly.js',
                     'assets/js/marker-generator.js',
