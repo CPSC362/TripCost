@@ -276,7 +276,7 @@ var TripCost = (function() {
         },
 
         isActiveVehicle: function(vehicle) {
-            return (parseInt(this.vehicle.vehicleId) == parseInt(vehicle.vehicleId));
+            return (this.vehicle != null && parseInt(this.vehicle.vehicleId) == parseInt(vehicle.vehicleId));
         },
 
         getMap: function() {

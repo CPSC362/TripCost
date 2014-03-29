@@ -23,7 +23,7 @@
 {% block scripts %}
 {{super()}}
 <script src="//maps.googleapis.com/maps/api/js?v=3&sensor=false&extension=.js"></script>
-<script src="{{url_for('.static', filename='js/dist/combined.min.js')}}"></script>
+<script src="{{url_for('.static', filename='js/dist/combined.js')}}"></script>
 {% endblock %}
 
 {% block content %}
@@ -161,7 +161,7 @@
   <li data-vehicle-id="{{ vehicleId }}">
     <a href="#" id="edit-vehicle-{{ vehicleId }}">
       {{ name }}
-      <span class="close link-close">&times;</span>
+      <span class="close link-close"><i class="fa fa-trash-o"></i></span>
     </a>
   </li>
   {{/each}}

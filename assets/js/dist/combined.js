@@ -3704,7 +3704,7 @@ var TripCost = (function() {
         },
 
         isActiveVehicle: function(vehicle) {
-            return (parseInt(this.vehicle.vehicleId) == parseInt(vehicle.vehicleId));
+            return (this.vehicle != null && parseInt(this.vehicle.vehicleId) == parseInt(vehicle.vehicleId));
         },
 
         getMap: function() {
@@ -4326,9 +4326,15 @@ $(function() {
 
 
         tripCost.addDeleteVehicleMenuListener(function(vehicle) {
-            console.log(vehicle);
+            DEBUG && console.log("Deleting vehicle: ", vehicle);
+
             selectMenu.find('option[value=' + vehicle.vehicleId + ']').remove();
-            listMenu.find('li[data-vehicle-id=' + vehicle.vehicleId + ']').remove();
+
+            DEBUG && console.log("Remaining vehicles: ", tripCost.vehicles);
+
+            simpleHandlebarsCompiler('#vehicle-list-template', {
+                vehicles: tripCost.vehicles
+            }, listMenu);
         });
 
         // Persistent storage.
@@ -4520,9 +4526,11 @@ $(function() {
         $('#nav-vehicle-list a').click(function(e) {
             e.preventDefault();
 
+            console.log("Clicked: ", $(e.target));
+
             var vehicleId = $(e.target).parents('li').attr('data-vehicle-id');
 
-            if ($(e.target).hasClass('close')) {
+            if ($(e.target).hasClass('close') || $(e.target).parent().hasClass('close')) {
                 DEBUG && console.log('Deleting vehicle ' + vehicleId + '...');
 
                 if (confirm('Are you sure you wish to delete the vehicle?')) {
