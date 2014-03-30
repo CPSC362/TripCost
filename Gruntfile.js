@@ -8,7 +8,7 @@ module.exports = function(grunt) {
                     'assets/css/vendor/bootstrap.css',
                     'assets/css/style.css'
                 ],
-                dest: 'assets/css/combined.css'
+                dest: 'assets/css/dist/combined.css'
             },
 
             js: {
@@ -31,8 +31,8 @@ module.exports = function(grunt) {
 
         cssmin: {
             css: {
-                src: 'assets/css/combined.css',
-                dest: 'assets/css/combined.min.css'
+                src: 'assets/css/dist/combined.css',
+                dest: 'assets/css/dist/combined.min.css'
             }
         },
 
