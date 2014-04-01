@@ -13,18 +13,27 @@ module.exports = function(grunt) {
 
             js: {
                 src: [
-                    'assets/js/vendor/jquery-2.0.3.js',
-                    'assets/js/vendor/bootstrap.js',
-                    'assets/js/vendor/handlebars-v1.3.0.js',
+                    // Vendor JS
+                    'bower_components/jquery/jquery.js',
+                    'bower_components/bootstrap/dist/js/bootstrap.js',
+                    'bower_components/handlebars/handlebars.runtime.js',
                     'assets/js/vendor/v3_epoly.js',
-                    'assets/js/marker-generator.js',
                     'assets/js/vendor/EdmundsAPI-sdk-javascript/edmunds.api.sdk.js',
+
+                    // Utility JS
+                    'assets/js/handlebars-helpers.js',
+
+                    // Developer JS
+                    'assets/js/marker-generator.js',
                     'assets/js/trip-cost.js',
                     'assets/js/vehicle.js',
                     'assets/js/fuel-economy.js',
                     'assets/js/gas-feed.js',
                     'assets/js/persistence.js',
-                    'assets/js/main.js'
+                    'assets/js/main.js',
+
+                    // Handlebars Templates
+                    'assets/js/.tmp/templates.js'
                 ],
                 dest: 'assets/js/dist/combined.js'
             }
@@ -37,6 +46,27 @@ module.exports = function(grunt) {
             }
         },
 
+        handlebars: {
+            compile: {
+                options: {
+                    namespace: 'TripCostTemplates',
+                    processName: function(filePath) {
+                        var pieces = filePath.split('/');
+                        return pieces[pieces.length - 1].replace(/\.[^/.]+$/, "");
+                    }
+                },
+                files: {
+                    'assets/js/.tmp/templates.js': 'assets/templates/**/*.hbs'
+                }
+            },
+            compilerOptions: {
+                knownHelpers: {
+                    "formatNumber": true
+                },
+                knownHelpersOnly: true
+            }
+        },
+
         uglify: {
             js: {
                 files: {
@@ -46,10 +76,11 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            files: ['assets/js/*', 'assets/css/*'],
+            files: ['assets/js/*', 'assets/css/*', 'assets/templates/*'],
             tasks: [
                 'concat:css',
                 'cssmin:css',
+                'handlebars',
                 'concat:js',
                 'uglify:js'
             ],
@@ -63,9 +94,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.registerTask('default', [
         'concat:css',
         'cssmin:css',
+        'handlebars',
         'concat:js',
         'uglify:js'
     ]);

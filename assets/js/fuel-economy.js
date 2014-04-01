@@ -230,6 +230,7 @@ var FuelEconomy = (function() {
 
         reset: function(form) {
             $(form).find('select').val('');
+            $(form).find('.thumbnail').parent().html('');
         }
     };
 

@@ -16,24 +16,6 @@ $.fn.serializeObject = function() {
     return e
 }
 
-var formatNumber = function(number) {
-    var decimalPlaces = isNaN(decimalPlaces = Math.abs(decimalPlaces)) ? 2 : decimalPlaces,
-        decimalSeparator = decimalSeparator == undefined ? "." : decimalSeparator,
-        commaSeparator = commaSeparator == undefined ? "," : commaSeparator,
-        sign = number < 0 ? "-" : "",
-        i = parseInt(number = Math.abs(+number || 0).toFixed(decimalPlaces)) + "",
-        j = (j = i.length) > 3 ? j % 3 : 0;
-    return sign + (j ? i.substr(0, j) + commaSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + commaSeparator) + (decimalPlaces ? decimalSeparator + Math.abs(number - i).toFixed(decimalPlaces).slice(2) : "");
-}
-
-Handlebars.registerHelper("formatNumber", formatNumber);
-
-function simpleHandlebarsCompiler(templateSelector, data, outputSelector) {
-    var template = Handlebars.compile($(templateSelector).html());
-
-    $(outputSelector).html(template(data));
-};
-
 $(function() {
     $('.dropdown-menu form').click(function(e) {
         e.stopPropagation();
@@ -83,9 +65,9 @@ $(function() {
             });
 
             // List of available vehicles in navigation bar
-            simpleHandlebarsCompiler('#vehicle-list-template', {
+            listMenu.html(TripCostTemplates.vehicles({
                 vehicles: vehicles
-            }, listMenu);
+            }));
         });
 
 
@@ -96,9 +78,10 @@ $(function() {
 
             DEBUG && console.log("Remaining vehicles: ", tripCost.vehicles);
 
-            simpleHandlebarsCompiler('#vehicle-list-template', {
+            // List of available vehicles in navigation bar
+            listMenu.html(TripCostTemplates.vehicles({
                 vehicles: tripCost.vehicles
-            }, listMenu);
+            }));
         });
 
         // Persistent storage.
@@ -132,9 +115,10 @@ $(function() {
         tripCost.loadVehicles(persistentStorage.get('vehicles'));
 
         if (tripCost.vehicles.length == 0) {
-            simpleHandlebarsCompiler('#vehicle-list-template', {
+            // List of available vehicles in navigation bar
+            listMenu.html(TripCostTemplates.vehicles({
                 vehicles: []
-            }, listMenu);
+            }));
         }
 
         $('#findRoute').click(function(e) {
@@ -211,12 +195,13 @@ $(function() {
 
                     DEBUG && console.log("Vehicle for route: ", tripCost.vehicle);
 
-                    simpleHandlebarsCompiler('#results-template', {
+                    // List of available vehicles in navigation bar
+                    $('#results-container').html(TripCostTemplates.results({
                         epa: epaCost,
                         ege: egeCost,
                         mainImage: tripCost.vehicle.mainImage,
                         name: tripCost.vehicle.name
-                    }, '#results-container');
+                    }));
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));
@@ -256,8 +241,8 @@ $(function() {
             fuelEconomy.setVehicleMetadata('vehicleId', $(e.target).val());
 
             fuelEconomy.showVehiclePreview(Vehicle, function(data) {
-                simpleHandlebarsCompiler('#vehicle-preview-template', data, 'div.add-vehicle-preview div.image-thumbnail');
-            })
+                $('div.add-vehicle-preview div.image-thumbnail').html(TripCostTemplates.preview(data));
+            });
         });
 
         $('#add-vehicle-save').click(function(e) {
