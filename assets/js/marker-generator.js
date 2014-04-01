@@ -10,7 +10,9 @@ var MarkerGenerator = (function() {
 
         this.maxDistance = 0;
 
-        this.gMarkers = [];
+        this.mapMarkers = [];
+
+        this.gasStations = [];
 
         this.icons = new Array();
 
@@ -43,6 +45,16 @@ var MarkerGenerator = (function() {
             new this.googleProvider.maps.Size(20, 32)
         );
 
+        this.icons["yellow"] = new this.googleProvider.maps.MarkerImage('/assets/img/yellow-marker.png',
+            new this.googleProvider.maps.Size(40, 64),
+
+            new this.googleProvider.maps.Point(0, 0),
+
+            new this.googleProvider.maps.Point(10, 32),
+
+            new this.googleProvider.maps.Size(20, 32)
+        );
+
 
 
         this.iconShape = {
@@ -58,7 +70,7 @@ var MarkerGenerator = (function() {
 
     MarkerGenerator.prototype = {
 
-        routeHandler: function(directions, maxVehicleDistance) {
+        routeHandler: function(directions, maxVehicleDistance, callbackForMarker) {
 
             // Get the primary route from the directions object
             var route = directions.routes[0];
@@ -69,6 +81,7 @@ var MarkerGenerator = (function() {
             startLocation = new Object();
             endLocation = new Object();
 
+            // Create an invisible polyline that will follow the path of the directions
             var polyline = new this.googleProvider.maps.Polyline({
                 path: [],
                 strokeColor: '#FF0000',
@@ -79,31 +92,65 @@ var MarkerGenerator = (function() {
 
             for (var i = 0, s = legs.length; i < s; ++i) {
 
+                // For each leg of the trip, we need the start and end to calculate the distance
                 startLocation.latlng = legs[i].start_location;
                 startLocation.address = legs[i].start_address;
-                // startLocation.marker = createMarker(legs[i].start_location,"start",legs[i].start_address,"green");
 
                 endLocation.latlng = legs[i].end_location;
                 endLocation.address = legs[i].end_address;
 
                 var steps = legs[i].steps;
 
-                // alert("processing " + steps.length + " steps");
-
                 for (var j = 0, t = steps.length; j < t; ++j) {
 
+                    // Get the path of the next segment
                     var nextSegment = steps[j].path;
 
                     for (var k = 0, u = nextSegment.length; k < u; ++k) {
+                        // Push all of the paths onto the polyline
                         polyline.getPath().push(nextSegment[k]);
-                        bounds.extend(nextSegment[k]);
                     }
                 }
             }
 
             for (var i = 0; i < polyline.Distance(); i += maxVehicleDistance) {
-                // TODO: Set to correct distance
-                if (i != 0) this.createMarker(polyline.GetPointAtDistance(i), "200km", "200km", "magenta");
+
+                DEBUG && console.log("Point at distance: ", polyline.GetPointAtDistance(i));
+
+                if (i != 0) {
+                    // Use the epolys.js library to get a Google Maps point at the specified distance
+                    var point = polyline.GetPointAtDistance(i);
+
+                    // Use the distance in miles as the label of the marker
+                    var description = this.formatNumber(this.metersToMiles(i)) + " mi";
+
+                    // Create a magenta colored Google Maps marker for the point
+                    this.createMarker(point, description, point.toString(), "magenta");
+
+                    // If a callback is specified, run the callback against each point
+                    if (typeof callbackForMarker == "function") {
+                        callbackForMarker(point);
+                    }
+                }
+            }
+        },
+
+        gasStationHandler: function(stations) {
+
+            var point;
+
+            // Loop through each of the gas stations
+            for (var i = 0, s = stations.length; i < s; ++i) {
+
+                // Generate a Google Maps point based on the station's latitude and longitude
+                point = new this.googleProvider.maps.LatLng(parseFloat(stations[i].lat), parseFloat(stations[i].lng));
+
+                var label = stations[i].station + ' - $' + stations[i].price;
+
+                var description = stations[i].address + '<br />' + stations[i].city + ', ' + stations[i].region + ' ' + stations[i].zip;
+
+                // Create the marker for the gas station
+                this.createMarker(point, label, description, "yellow");
             }
         },
 
@@ -127,12 +174,14 @@ var MarkerGenerator = (function() {
 
         createMarker: function(latLng, label, html, color) {
 
+            var self = this;
+
             // Possibly use handlebars templating
             var contentString = '<b>' + label + '</b><br>' + html;
 
             var marker = new this.googleProvider.maps.Marker({
                 position: latLng,
-                // draggable: true, 
+                // draggable: true,
                 map: this.map,
                 shadow: this.iconShadow,
                 icon: this.getMarkerImage(color),
@@ -141,12 +190,16 @@ var MarkerGenerator = (function() {
                 zIndex: Math.round(latLng.lat() * -100000) << 5
             });
 
+            // Set the label
             marker.myname = label;
-            this.gMarkers.push(marker);
 
+            // Add the marker to an array so it can be cleared
+            this.mapMarkers.push(marker);
+
+            // Set a click responder for each of the markers to open their info window
             this.googleProvider.maps.event.addListener(marker, 'click', function() {
-                this.infoWindow.setContent(contentString);
-                this.infoWindow.open(this.map, marker);
+                self.infoWindow.setContent(contentString);
+                self.infoWindow.open(self.map, marker);
             });
 
             return marker;
@@ -154,14 +207,28 @@ var MarkerGenerator = (function() {
 
         clearMarkers: function() {
 
-            var marker = this.gMarkers.pop();
+            var marker = this.mapMarkers.pop();
 
             while (marker != undefined) {
-                console.log("Clearing marker...");
+                DEBUG && console.log("Clearing marker...");
                 marker.setMap(null);
-                marker = this.gMarkers.pop();
+                marker = this.mapMarkers.pop();
             }
 
+        },
+
+        formatNumber: function(number) {
+            var decimalPlaces = isNaN(decimalPlaces = Math.abs(decimalPlaces)) ? 2 : decimalPlaces,
+                decimalSeparator = decimalSeparator == undefined ? "." : decimalSeparator,
+                commaSeparator = commaSeparator == undefined ? "," : commaSeparator,
+                sign = number < 0 ? "-" : "",
+                i = parseInt(number = Math.abs(+number || 0).toFixed(decimalPlaces)) + "",
+                j = (j = i.length) > 3 ? j % 3 : 0;
+            return sign + (j ? i.substr(0, j) + commaSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + commaSeparator) + (decimalPlaces ? decimalSeparator + Math.abs(number - i).toFixed(decimalPlaces).slice(2) : "");
+        },
+
+        metersToMiles: function(meters) {
+            return meters * 0.000621371;
         }
     };
 

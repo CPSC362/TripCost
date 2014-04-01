@@ -16,7 +16,7 @@ $.fn.serializeObject = function() {
     return e
 }
 
-Handlebars.registerHelper("formatMoney", function(number) {
+var formatNumber = function(number) {
     var decimalPlaces = isNaN(decimalPlaces = Math.abs(decimalPlaces)) ? 2 : decimalPlaces,
         decimalSeparator = decimalSeparator == undefined ? "." : decimalSeparator,
         commaSeparator = commaSeparator == undefined ? "," : commaSeparator,
@@ -24,7 +24,9 @@ Handlebars.registerHelper("formatMoney", function(number) {
         i = parseInt(number = Math.abs(+number || 0).toFixed(decimalPlaces)) + "",
         j = (j = i.length) > 3 ? j % 3 : 0;
     return sign + (j ? i.substr(0, j) + commaSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + commaSeparator) + (decimalPlaces ? decimalSeparator + Math.abs(number - i).toFixed(decimalPlaces).slice(2) : "");
-});
+}
+
+Handlebars.registerHelper("formatNumber", formatNumber);
 
 function simpleHandlebarsCompiler(templateSelector, data, outputSelector) {
     var template = Handlebars.compile($(templateSelector).html());
@@ -104,6 +106,8 @@ $(function() {
         // Just need to implement methods set(), get(), and delete()
         var persistentStorage = new Persistence(localStorage);
 
+        var gasFeed = new GasFeed($);
+
         var directionsForm = {
             start: $('#directions-form input[name="start"]'),
             startError: $('#directions-form .start-error'),
@@ -175,7 +179,7 @@ $(function() {
 
                     var gasPrice = 3.90;
 
-                    console.log(trip);
+                    DEBUG && console.log("Trip: ", trip);
 
                     for (var i = 0, s = trip.routes.length; i < s; ++i) {
                         for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
@@ -191,9 +195,21 @@ $(function() {
                     // Assign a default in case the vehicle's range is 0
                     var maxRange = tripCost.vehicle.maxRange(true) || 482803.0;
 
-                    markerGenerator.routeHandler(trip, maxRange);
+                    markerGenerator.routeHandler(trip, maxRange, function(point) {
+                        // Add gas stations around each location
+                        gasFeed.getStations({
+                            latitude: point.lat(),
+                            longitude: point.lng()
+                            // distance:
+                            // fueltype:
+                            // sortBy:
+                        }, function(stations) {
+                            DEBUG && console.log("Gas Stations: ", stations);
+                            markerGenerator.gasStationHandler(stations);
+                        });
+                    });
 
-                    console.log("Vehicle for route: ", tripCost.vehicle);
+                    DEBUG && console.log("Vehicle for route: ", tripCost.vehicle);
 
                     simpleHandlebarsCompiler('#results-template', {
                         epa: epaCost,
@@ -288,7 +304,7 @@ $(function() {
         $('#nav-vehicle-list a').click(function(e) {
             e.preventDefault();
 
-            console.log("Clicked: ", $(e.target));
+            DEBUG && console.log("Clicked: ", $(e.target));
 
             var vehicleId = $(e.target).parents('li').attr('data-vehicle-id');
 

@@ -22,6 +22,7 @@ module.exports = function(grunt) {
                     'assets/js/trip-cost.js',
                     'assets/js/vehicle.js',
                     'assets/js/fuel-economy.js',
+                    'assets/js/gas-feed.js',
                     'assets/js/persistence.js',
                     'assets/js/main.js'
                 ],
@@ -51,7 +52,10 @@ module.exports = function(grunt) {
                 'cssmin:css',
                 'concat:js',
                 'uglify:js'
-            ]
+            ],
+            options: {
+                livereload: true
+            }
         }
     });
 
