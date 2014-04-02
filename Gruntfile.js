@@ -24,6 +24,7 @@ module.exports = function(grunt) {
                     // Utility JS
                     'assets/js/handlebars-helpers.js',
                     'assets/js/momentjs-helpers.js',
+                    'assets/js/jquery-helpers.js',
 
                     // Developer JS
                     'assets/js/marker-generator.js',

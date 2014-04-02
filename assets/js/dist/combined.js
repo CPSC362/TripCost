@@ -14247,6 +14247,23 @@ if (typeof window.sdkAsyncInit === "function") {
     }
 
 })(window.moment);
+// Applying a "all" function to jQuery defferred objects
+(function(jQuery) {
+    if (jQuery.when.all === undefined) {
+        jQuery.when.all = function(deferreds) {
+            var deferred = new jQuery.Deferred();
+            $.when.apply(jQuery, deferreds).then(
+                function() {
+                    deferred.resolve(Array.prototype.slice.call(arguments));
+                },
+                function() {
+                    deferred.fail(Array.prototype.slice.call(arguments));
+                });
+
+            return deferred;
+        }
+    }
+})(window.jQuery);
 var MarkerGenerator = (function() {
 
     function MarkerGenerator(_google, _map) {
@@ -14265,24 +14282,15 @@ var MarkerGenerator = (function() {
 
         this.icons = new Array();
 
-        this.icons["red"] = new this.googleProvider.maps.MarkerImage('/assets/img/marker_red.png',
-            // This marker is 20 pixels wide by 34 pixels tall.
-            new this.googleProvider.maps.Size(20, 34),
-            // The origin for this image is 0,0.
-            new this.googleProvider.maps.Point(0, 0),
-            // The anchor for this image is at 9,34.
-            new this.googleProvider.maps.Point(9, 34)
-        );
+        // this.icons["green"] = new this.googleProvider.maps.MarkerImage('/assets/img/green-marker.png',
+        //     new this.googleProvider.maps.Size(40, 64),
 
-        this.icons["green"] = new this.googleProvider.maps.MarkerImage('/assets/img/green-marker.png',
-            new this.googleProvider.maps.Size(40, 64),
+        //     new this.googleProvider.maps.Point(0, 0),
 
-            new this.googleProvider.maps.Point(0, 0),
+        //     new this.googleProvider.maps.Point(10, 32),
 
-            new this.googleProvider.maps.Point(10, 32),
-
-            new this.googleProvider.maps.Size(20, 32)
-        );
+        //     new this.googleProvider.maps.Size(20, 32)
+        // );
 
         this.icons["magenta"] = new this.googleProvider.maps.MarkerImage('/assets/img/magenta-marker.png',
             new this.googleProvider.maps.Size(40, 64),
@@ -14312,20 +14320,24 @@ var MarkerGenerator = (function() {
         };
 
         this.infoWindow = new this.googleProvider.maps.InfoWindow({
-            size: new this.googleProvider.maps.Size(150, 50)
+            size: new this.googleProvider.maps.Size(150, 50),
+            // Custom image is misaligning the InfoWindow. This fixes the positioning
+            pixelOffset: new this.googleProvider.maps.Size(-10, 0)
         });
 
     };
 
     MarkerGenerator.prototype = {
 
-        routeHandler: function(directions, maxVehicleDistance, callbackForMarker) {
+        routeHandler: function(directions, maxVehicleDistance, callbackForMarker, callbackForAllMarkers) {
 
             // Get the primary route from the directions object
             var route = directions.routes[0];
 
             // Get the map bounds
             var bounds = new this.googleProvider.maps.LatLngBounds();
+
+            var markers = [];
 
             startLocation = new Object();
             endLocation = new Object();
@@ -14362,25 +14374,34 @@ var MarkerGenerator = (function() {
                 }
             }
 
-            for (var i = 0; i < polyline.Distance(); i += maxVehicleDistance) {
+            var totalPoints = Math.floor(polyline.Distance() / maxVehicleDistance);
 
-                DEBUG && console.log("Point at distance: ", polyline.GetPointAtDistance(i));
+            for (var distanceIndex = 0, i = 0; distanceIndex < polyline.Distance(); distanceIndex += maxVehicleDistance, i++) {
 
-                if (i != 0) {
+                DEBUG && console.log("Point at distance: ", polyline.GetPointAtDistance(distanceIndex));
+
+                if (distanceIndex != 0) {
                     // Use the epolys.js library to get a Google Maps point at the specified distance
-                    var point = polyline.GetPointAtDistance(i);
+                    var point = polyline.GetPointAtDistance(distanceIndex);
 
                     // Use the distance in miles as the label of the marker
-                    var description = this.formatNumber(this.metersToMiles(i)) + " mi";
+                    var description = this.formatNumber(this.metersToMiles(distanceIndex)) + " mi";
 
                     // Create a magenta colored Google Maps marker for the point
-                    this.createMarker(point, description, point.toString(), "magenta");
+                    var marker = this.createMarker(point, description, point.toString(), "magenta");
+
+                    // Push the marker to an array to pass to the finished callback
+                    markers.push(marker);
 
                     // If a callback is specified, run the callback against each point
-                    if (typeof callbackForMarker == "function") {
-                        callbackForMarker(point);
+                    if (typeof callbackForMarker === "function") {
+                        callbackForMarker(point, i, totalPoints);
                     }
                 }
+            }
+
+            if (typeof callbackForAllMarkers === "function") {
+                callbackForAllMarkers(markers);
             }
         },
 
@@ -14405,7 +14426,7 @@ var MarkerGenerator = (function() {
 
         getMarkerImage: function(iconColor) {
 
-            iconColor = (iconColor == undefined) ? "red" : iconColor;
+            iconColor = (iconColor == undefined) ? "magenta" : iconColor;
 
             if (!this.icons[iconColor]) {
                 this.icons[iconColor] = new this.googleProvider.maps.MarkerImage("/assets/img/marker_" + iconColor + ".png",
@@ -14436,7 +14457,8 @@ var MarkerGenerator = (function() {
                 icon: this.getMarkerImage(color),
                 shape: this.iconShape,
                 title: label,
-                zIndex: Math.round(latLng.lat() * -100000) << 5
+                zIndex: Math.round(latLng.lat() * -100000) << 5,
+                animation: this.googleProvider.maps.Animation.DROP
             });
 
             // Set the label
@@ -15186,16 +15208,25 @@ var GasFeed = (function() {
     // Constructor method
     function GasFeed(jQuery, momentJS) {
 
+        // jQuery dependency for ajax (could be removed)
         this.$ = jQuery;
 
+        // MomentJS dependency for applying a threshold for gas station price updates
         this.moment = momentJS;
 
-        this.apiKey = 'ka89irk0fm' || 'rfej9napna';
-
+        // Changing modes will change the baseUrl
         this.mode = 'production';
 
-        this.baseUrl = (this.mode == 'development') ? 'http://devapi.mygasfeed.com/' : 'http://api.mygasfeed.com/';
+        if (this.mode == 'production') {
+            // mygasfeed.com API key
+            this.apiKey = 'ka89irk0fm';
+            this.baseUrl = 'http://api.mygasfeed.com/';
+        } else {
+            this.apiKey = 'rfej9napna';
+            this.baseUrl = 'http://devapi.mygasfeed.com/';
+        }
 
+        // Gas station price update threshold
         this.mustBeUpdatedSoonerThan = this.moment().subtract('weeks', 2).unix();
 
     };
@@ -15209,16 +15240,10 @@ var GasFeed = (function() {
 
             var self = this;
 
-            this.$.ajax({
+            return this.$.ajax({
                 url: this.baseUrl + 'stations/radius/' + [options.latitude, options.longitude, options.distance, options.fuelType, options.sortBy, this.apiKey].join('/') + '.json',
                 jsonp: 'callback',
-                dataType: 'jsonp',
-                success: function(response, textStatus) {
-                    callbackWhenFinished(self.parseStations(response.stations));
-                },
-                error: function(response, textStatus) {
-                    alert('Error receiving information from gas station API');
-                }
+                dataType: 'jsonp'
             });
         },
 
@@ -15231,8 +15256,6 @@ var GasFeed = (function() {
                     var lastUpdated = this.moment.parseHumanized(stations[i].date).unix();
                     var now = this.moment().unix();
 
-                    DEBUG && console.log("lastUpdated: ", lastUpdated, "now: ", now, "mustBeUpdatedSoonerThan: ", this.mustBeUpdatedSoonerThan);
-
                     if (lastUpdated > this.mustBeUpdatedSoonerThan) {
                         parsedStations.push(stations[i]);
                     }
@@ -15242,6 +15265,23 @@ var GasFeed = (function() {
             }
 
             return parsedStations;
+        },
+
+        cheapestGas: function(stations) {
+
+            console.log("Cheapest gas stations: ", stations);
+
+            if (stations.length === 0) return null;
+
+            var cheapest = parseFloat(stations[0].price);
+            console.log("First station: ", cheapest);
+
+            for (var i = 1, s = stations.length; i < s; ++i) {
+                var price = parseFloat(stations[i].price);
+                if (price < cheapest) cheapest = price;
+            }
+
+            return cheapest;
         }
     };
 
@@ -15537,47 +15577,71 @@ $(function() {
 
                     var distance = 0;
 
-                    var gasPrice = 3.90;
-
-                    DEBUG && console.log("Trip: ", trip);
-
-                    for (var i = 0, s = trip.routes.length; i < s; ++i) {
-                        for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
-                            distance += trip.routes[i].legs[j].distance.value;
-                        }
-                    }
-
-                    distanceInMiles = distance * 0.000621371;
-
-                    var epaCost = (distanceInMiles / tripCost.vehicle.epaCombinedMpg) * gasPrice;
-                    var egeCost = (distanceInMiles / tripCost.vehicle.egeCombinedMpg) * gasPrice;
-
                     // Assign a default in case the vehicle's range is 0
                     var maxRange = tripCost.vehicle.maxRange(true) || 482803.0;
 
-                    markerGenerator.routeHandler(trip, maxRange, function(point) {
-                        // Add gas stations around each location
-                        gasFeed.getStations({
-                            latitude: point.lat(),
-                            longitude: point.lng()
-                            // distance:
-                            // fueltype:
-                            // sortBy:
-                        }, function(stations) {
-                            DEBUG && console.log("Gas Stations: ", stations);
-                            markerGenerator.gasStationHandler(stations);
+                    var gasPrices = new Array();
+
+                    var callbackWhenGasStationsFinished = function(allGasStations) {
+                        DEBUG && console.log("Trip: ", trip);
+
+                        for (var i = 0, s = trip.routes.length; i < s; ++i) {
+                            for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
+                                distance += trip.routes[i].legs[j].distance.value;
+                            }
+                        }
+
+                        distanceInMiles = distance * 0.000621371;
+
+                        var epaCost = (distanceInMiles / tripCost.vehicle.epaCombinedMpg) * gasPrice;
+                        var egeCost = (distanceInMiles / tripCost.vehicle.egeCombinedMpg) * gasPrice;
+
+                        DEBUG && console.log("Vehicle for route: ", tripCost.vehicle);
+
+                        // List of available vehicles in navigation bar
+                        $('#results-container').html(TripCostTemplates.results({
+                            epa: epaCost,
+                            ege: egeCost,
+                            mainImage: tripCost.vehicle.mainImage,
+                            name: tripCost.vehicle.name
+                        }));
+                    };
+
+                    var callbackWhenMarkerGeneratorFinished = function(markers) {
+
+                        var gasStationAjaxObjects = [];
+
+                        for (var i = 0, s = markers.length; i < s; ++i) {
+                            gasStationAjaxObjects.push(gasFeed.getStations({
+                                latitude: markers[i].position.lat(),
+                                longitude: markers[i].position.lng()
+                            }));
+                        }
+
+                        $.when.all(gasStationAjaxObjects).done(function(allStations) {
+
+                            var stations, cheapestGasStation;
+
+                            for (var i = 0, s = allStations.length; i < s; ++i) {
+                                stations = gasFeed.parseStations(allStations[i][0].stations);
+                                cheapestGasStation = gasFeed.cheapestGas(stations);
+
+                                markerGenerator.gasStationHandler(stations);
+                                gasPrices.push(cheapestGasStation);
+
+                            }
+
+                            // Now we have an array of all the gas stations, can caluclate cost for each
                         });
-                    });
+                    };
 
-                    DEBUG && console.log("Vehicle for route: ", tripCost.vehicle);
+                    markerGenerator.routeHandler(trip, maxRange, null, callbackWhenMarkerGeneratorFinished);
 
-                    // List of available vehicles in navigation bar
-                    $('#results-container').html(TripCostTemplates.results({
-                        epa: epaCost,
-                        ege: egeCost,
-                        mainImage: tripCost.vehicle.mainImage,
-                        name: tripCost.vehicle.name
-                    }));
+
+
+                    var gasPrice = 3.90;
+
+
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));

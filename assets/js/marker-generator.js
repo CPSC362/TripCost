@@ -16,24 +16,15 @@ var MarkerGenerator = (function() {
 
         this.icons = new Array();
 
-        this.icons["red"] = new this.googleProvider.maps.MarkerImage('/assets/img/marker_red.png',
-            // This marker is 20 pixels wide by 34 pixels tall.
-            new this.googleProvider.maps.Size(20, 34),
-            // The origin for this image is 0,0.
-            new this.googleProvider.maps.Point(0, 0),
-            // The anchor for this image is at 9,34.
-            new this.googleProvider.maps.Point(9, 34)
-        );
+        // this.icons["green"] = new this.googleProvider.maps.MarkerImage('/assets/img/green-marker.png',
+        //     new this.googleProvider.maps.Size(40, 64),
 
-        this.icons["green"] = new this.googleProvider.maps.MarkerImage('/assets/img/green-marker.png',
-            new this.googleProvider.maps.Size(40, 64),
+        //     new this.googleProvider.maps.Point(0, 0),
 
-            new this.googleProvider.maps.Point(0, 0),
+        //     new this.googleProvider.maps.Point(10, 32),
 
-            new this.googleProvider.maps.Point(10, 32),
-
-            new this.googleProvider.maps.Size(20, 32)
-        );
+        //     new this.googleProvider.maps.Size(20, 32)
+        // );
 
         this.icons["magenta"] = new this.googleProvider.maps.MarkerImage('/assets/img/magenta-marker.png',
             new this.googleProvider.maps.Size(40, 64),
@@ -63,20 +54,24 @@ var MarkerGenerator = (function() {
         };
 
         this.infoWindow = new this.googleProvider.maps.InfoWindow({
-            size: new this.googleProvider.maps.Size(150, 50)
+            size: new this.googleProvider.maps.Size(150, 50),
+            // Custom image is misaligning the InfoWindow. This fixes the positioning
+            pixelOffset: new this.googleProvider.maps.Size(-10, 0)
         });
 
     };
 
     MarkerGenerator.prototype = {
 
-        routeHandler: function(directions, maxVehicleDistance, callbackForMarker) {
+        routeHandler: function(directions, maxVehicleDistance, callbackForMarker, callbackForAllMarkers) {
 
             // Get the primary route from the directions object
             var route = directions.routes[0];
 
             // Get the map bounds
             var bounds = new this.googleProvider.maps.LatLngBounds();
+
+            var markers = [];
 
             startLocation = new Object();
             endLocation = new Object();
@@ -113,25 +108,34 @@ var MarkerGenerator = (function() {
                 }
             }
 
-            for (var i = 0; i < polyline.Distance(); i += maxVehicleDistance) {
+            var totalPoints = Math.floor(polyline.Distance() / maxVehicleDistance);
 
-                DEBUG && console.log("Point at distance: ", polyline.GetPointAtDistance(i));
+            for (var distanceIndex = 0, i = 0; distanceIndex < polyline.Distance(); distanceIndex += maxVehicleDistance, i++) {
 
-                if (i != 0) {
+                DEBUG && console.log("Point at distance: ", polyline.GetPointAtDistance(distanceIndex));
+
+                if (distanceIndex != 0) {
                     // Use the epolys.js library to get a Google Maps point at the specified distance
-                    var point = polyline.GetPointAtDistance(i);
+                    var point = polyline.GetPointAtDistance(distanceIndex);
 
                     // Use the distance in miles as the label of the marker
-                    var description = this.formatNumber(this.metersToMiles(i)) + " mi";
+                    var description = this.formatNumber(this.metersToMiles(distanceIndex)) + " mi";
 
                     // Create a magenta colored Google Maps marker for the point
-                    this.createMarker(point, description, point.toString(), "magenta");
+                    var marker = this.createMarker(point, description, point.toString(), "magenta");
+
+                    // Push the marker to an array to pass to the finished callback
+                    markers.push(marker);
 
                     // If a callback is specified, run the callback against each point
-                    if (typeof callbackForMarker == "function") {
-                        callbackForMarker(point);
+                    if (typeof callbackForMarker === "function") {
+                        callbackForMarker(point, i, totalPoints);
                     }
                 }
+            }
+
+            if (typeof callbackForAllMarkers === "function") {
+                callbackForAllMarkers(markers);
             }
         },
 
@@ -156,7 +160,7 @@ var MarkerGenerator = (function() {
 
         getMarkerImage: function(iconColor) {
 
-            iconColor = (iconColor == undefined) ? "red" : iconColor;
+            iconColor = (iconColor == undefined) ? "magenta" : iconColor;
 
             if (!this.icons[iconColor]) {
                 this.icons[iconColor] = new this.googleProvider.maps.MarkerImage("/assets/img/marker_" + iconColor + ".png",
@@ -187,7 +191,8 @@ var MarkerGenerator = (function() {
                 icon: this.getMarkerImage(color),
                 shape: this.iconShape,
                 title: label,
-                zIndex: Math.round(latLng.lat() * -100000) << 5
+                zIndex: Math.round(latLng.lat() * -100000) << 5,
+                animation: this.googleProvider.maps.Animation.DROP
             });
 
             // Set the label

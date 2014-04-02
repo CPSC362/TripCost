@@ -161,47 +161,71 @@ $(function() {
 
                     var distance = 0;
 
-                    var gasPrice = 3.90;
-
-                    DEBUG && console.log("Trip: ", trip);
-
-                    for (var i = 0, s = trip.routes.length; i < s; ++i) {
-                        for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
-                            distance += trip.routes[i].legs[j].distance.value;
-                        }
-                    }
-
-                    distanceInMiles = distance * 0.000621371;
-
-                    var epaCost = (distanceInMiles / tripCost.vehicle.epaCombinedMpg) * gasPrice;
-                    var egeCost = (distanceInMiles / tripCost.vehicle.egeCombinedMpg) * gasPrice;
-
                     // Assign a default in case the vehicle's range is 0
                     var maxRange = tripCost.vehicle.maxRange(true) || 482803.0;
 
-                    markerGenerator.routeHandler(trip, maxRange, function(point) {
-                        // Add gas stations around each location
-                        gasFeed.getStations({
-                            latitude: point.lat(),
-                            longitude: point.lng()
-                            // distance:
-                            // fueltype:
-                            // sortBy:
-                        }, function(stations) {
-                            DEBUG && console.log("Gas Stations: ", stations);
-                            markerGenerator.gasStationHandler(stations);
+                    var gasPrices = new Array();
+
+                    var callbackWhenGasStationsFinished = function(allGasStations) {
+                        DEBUG && console.log("Trip: ", trip);
+
+                        for (var i = 0, s = trip.routes.length; i < s; ++i) {
+                            for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
+                                distance += trip.routes[i].legs[j].distance.value;
+                            }
+                        }
+
+                        distanceInMiles = distance * 0.000621371;
+
+                        var epaCost = (distanceInMiles / tripCost.vehicle.epaCombinedMpg) * gasPrice;
+                        var egeCost = (distanceInMiles / tripCost.vehicle.egeCombinedMpg) * gasPrice;
+
+                        DEBUG && console.log("Vehicle for route: ", tripCost.vehicle);
+
+                        // List of available vehicles in navigation bar
+                        $('#results-container').html(TripCostTemplates.results({
+                            epa: epaCost,
+                            ege: egeCost,
+                            mainImage: tripCost.vehicle.mainImage,
+                            name: tripCost.vehicle.name
+                        }));
+                    };
+
+                    var callbackWhenMarkerGeneratorFinished = function(markers) {
+
+                        var gasStationAjaxObjects = [];
+
+                        for (var i = 0, s = markers.length; i < s; ++i) {
+                            gasStationAjaxObjects.push(gasFeed.getStations({
+                                latitude: markers[i].position.lat(),
+                                longitude: markers[i].position.lng()
+                            }));
+                        }
+
+                        $.when.all(gasStationAjaxObjects).done(function(allStations) {
+
+                            var stations, cheapestGasStation;
+
+                            for (var i = 0, s = allStations.length; i < s; ++i) {
+                                stations = gasFeed.parseStations(allStations[i][0].stations);
+                                cheapestGasStation = gasFeed.cheapestGas(stations);
+
+                                markerGenerator.gasStationHandler(stations);
+                                gasPrices.push(cheapestGasStation);
+
+                            }
+
+                            // Now we have an array of all the gas stations, can caluclate cost for each
                         });
-                    });
+                    };
 
-                    DEBUG && console.log("Vehicle for route: ", tripCost.vehicle);
+                    markerGenerator.routeHandler(trip, maxRange, null, callbackWhenMarkerGeneratorFinished);
 
-                    // List of available vehicles in navigation bar
-                    $('#results-container').html(TripCostTemplates.results({
-                        epa: epaCost,
-                        ege: egeCost,
-                        mainImage: tripCost.vehicle.mainImage,
-                        name: tripCost.vehicle.name
-                    }));
+
+
+                    var gasPrice = 3.90;
+
+
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));
