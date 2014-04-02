@@ -17,11 +17,13 @@ module.exports = function(grunt) {
                     'bower_components/jquery/jquery.js',
                     'bower_components/bootstrap/dist/js/bootstrap.js',
                     'bower_components/handlebars/handlebars.runtime.js',
+                    'bower_components/momentjs/moment.js',
                     'assets/js/vendor/v3_epoly.js',
                     'assets/js/vendor/EdmundsAPI-sdk-javascript/edmunds.api.sdk.js',
 
                     // Utility JS
                     'assets/js/handlebars-helpers.js',
+                    'assets/js/momentjs-helpers.js',
 
                     // Developer JS
                     'assets/js/marker-generator.js',

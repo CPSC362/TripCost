@@ -89,7 +89,7 @@ $(function() {
         // Just need to implement methods set(), get(), and delete()
         var persistentStorage = new Persistence(localStorage);
 
-        var gasFeed = new GasFeed($);
+        var gasFeed = new GasFeed($, moment);
 
         var directionsForm = {
             start: $('#directions-form input[name="start"]'),

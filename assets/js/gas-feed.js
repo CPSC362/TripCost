@@ -13,15 +13,19 @@ var GasFeed = (function() {
     var MAX_GAS_STATIONS = 5;
 
     // Constructor method
-    function GasFeed(jQuery) {
+    function GasFeed(jQuery, momentJS) {
 
         this.$ = jQuery;
+
+        this.moment = momentJS;
 
         this.apiKey = 'ka89irk0fm' || 'rfej9napna';
 
         this.mode = 'production';
 
         this.baseUrl = (this.mode == 'development') ? 'http://devapi.mygasfeed.com/' : 'http://api.mygasfeed.com/';
+
+        this.mustBeUpdatedSoonerThan = this.moment().subtract('weeks', 2).unix();
 
     };
 
@@ -53,7 +57,14 @@ var GasFeed = (function() {
 
             for (var i = 0, s = stations.length; i < s; ++i) {
                 if (stations[i].price != 'N/A' && parsedStations.length <= MAX_GAS_STATIONS) {
-                    parsedStations.push(stations[i]);
+                    var lastUpdated = this.moment.parseHumanized(stations[i].date).unix();
+                    var now = this.moment().unix();
+
+                    DEBUG && console.log("lastUpdated: ", lastUpdated, "now: ", now, "mustBeUpdatedSoonerThan: ", this.mustBeUpdatedSoonerThan);
+
+                    if (lastUpdated > this.mustBeUpdatedSoonerThan) {
+                        parsedStations.push(stations[i]);
+                    }
                 }
 
                 if (parsedStations.length == MAX_GAS_STATIONS) break;
