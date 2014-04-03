@@ -22,6 +22,9 @@ var Vehicle = (function() {
 
         this.mainImage = null;
 
+        this.defaultStopBeforeEmptyTankMeters = 32186.9;
+        this.defaultStopBeforeEmptyTankMiles = 20.0;
+
     };
 
     Vehicle.prototype = {
@@ -45,11 +48,14 @@ var Vehicle = (function() {
 
         },
 
-        maxRange: function(meters) {
+        maxRange: function(meters, stopPriorToEmptyTank) {
+
             if (meters) {
-                return this.epaCombinedMpg * this.fuelCapacity * 1609.34;
+                stopPriorToEmptyTank = (typeof stopPriorToEmptyTank === 'undefined') ? this.defaultStopBeforeEmptyTankMeters : stopPriorToEmptyTank;
+                return this.epaCombinedMpg * this.fuelCapacity * 1609.34 - stopPriorToEmptyTank;
             } else {
-                return this.epaCombinedMpg * this.fuelCapacity;
+                stopPriorToEmptyTank = (typeof stopPriorToEmptyTank === 'undefined') ? this.defaultStopBeforeEmptyTankMiles : stopPriorToEmptyTank;
+                return this.epaCombinedMpg * this.fuelCapacity - stopPriorToEmptyTank;
             }
         },
 

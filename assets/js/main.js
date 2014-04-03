@@ -1,21 +1,5 @@
 var DEBUG = true;
 
-$.fn.serializeObject = function() {
-    var e = {};
-    var t = this.serializeArray();
-    $.each(t, function() {
-        if (e[this.name]) {
-            if (!e[this.name].push) {
-                e[this.name] = [e[this.name]]
-            }
-            e[this.name].push(this.value || "")
-        } else {
-            e[this.name] = this.value || ""
-        }
-    });
-    return e;
-}
-
 $(function() {
     $('.dropdown-menu form').click(function(e) {
         e.stopPropagation();
@@ -27,10 +11,10 @@ $(function() {
             return;
         }
 
-        var markerGenerator;
-
         // Main objects and services
-        var tripCost = new TripCost('map-canvas', google);
+        var tripCost, fuelEconomy, persistentStorage, gasFeed, markerGenerator, edmunds;
+
+        tripCost = new TripCost('map-canvas', google);
 
         tripCost.initialize(function() {
             // after initialization...
@@ -42,9 +26,9 @@ $(function() {
         var selectMenu = $('#directions-form select[name="vehicle"]');
         var listMenu = $('#nav-vehicle-list');
 
-        var edmunds = new EDMUNDSAPI('qgtgm3apuq3fjkbfnzmmksnt');
+        edmunds = new EDMUNDSAPI('qgtgm3apuq3fjkbfnzmmksnt');
 
-        var fuelEconomy = new FuelEconomy(jQuery, edmunds);
+        fuelEconomy = new FuelEconomy(jQuery, edmunds);
         fuelEconomy.setSpinner('.add-vehicle-spinner');
 
         fuelEconomy.menus.year = $('select#add-vehicle-year');
@@ -87,9 +71,9 @@ $(function() {
         // Persistent storage.
         // Can swap out for localStorage, cookie, or server interface
         // Just need to implement methods set(), get(), and delete()
-        var persistentStorage = new Persistence(localStorage);
+        persistentStorage = new Persistence(localStorage);
 
-        var gasFeed = new GasFeed($, moment);
+        gasFeed = new GasFeed($, moment);
 
         var directionsForm = {
             start: $('#directions-form input[name="start"]'),
@@ -159,6 +143,7 @@ $(function() {
                     // Close all active menus
                     closeMenus();
 
+                    // Get the trip's start geolocation
                     var initialLocation = tripCost.startLocation(trip);
 
                     // Assign a default in case the vehicle's range is 0
@@ -166,10 +151,13 @@ $(function() {
 
                     var callbackWhenMarkerGeneratorFinished = function(markers) {
 
+                        // Receives an array of ajax calls
                         var gasStationAjaxObjects = gasFeed.findAllGasStations(initialLocation, markers);
 
+                        // Deferred objects takes care of synchronizing calls and providing one callback when all have completed
                         $.when.all(gasStationAjaxObjects).done(function(allStations) {
 
+                            // Calculate the trip cost
                             var totals = tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange);
 
                             $('#results-container').html(TripCostTemplates.results({

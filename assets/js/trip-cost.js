@@ -132,6 +132,19 @@ var TripCost = (function() {
             });
         },
 
+        /*
+        |--------------------------------------------------------------------------
+        | Calculate the cost of the trip
+        |--------------------------------------------------------------------------
+        |
+        | Calculate the cost of the trip based on current gas prices and the
+        | vehicle's mpg. Cost is based off of the cheapest gas station in the array.
+        | In the event that no gas stations are returned, an average gas price is
+        | calculated among all the cheapest stations along the route. In the event
+        | that the route has no gas station information, a national average will be
+        | used.
+        |
+        */
         calculateAllTheThings: function(trip, allStations, gasFeed, markerGenerator, maxRange) {
 
             var gasPrices = gasFeed.allGasPricesByCheapest(allStations, function(stations) {

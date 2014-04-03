@@ -14635,6 +14635,19 @@ var TripCost = (function() {
             });
         },
 
+        /*
+        |--------------------------------------------------------------------------
+        | Calculate the cost of the trip
+        |--------------------------------------------------------------------------
+        |
+        | Calculate the cost of the trip based on current gas prices and the
+        | vehicle's mpg. Cost is based off of the cheapest gas station in the array.
+        | In the event that no gas stations are returned, an average gas price is
+        | calculated among all the cheapest stations along the route. In the event
+        | that the route has no gas station information, a national average will be
+        | used.
+        |
+        */
         calculateAllTheThings: function(trip, allStations, gasFeed, markerGenerator, maxRange) {
 
             var gasPrices = gasFeed.allGasPricesByCheapest(allStations, function(stations) {
@@ -14862,6 +14875,9 @@ var Vehicle = (function() {
 
         this.mainImage = null;
 
+        this.defaultStopBeforeEmptyTankMeters = 32186.9;
+        this.defaultStopBeforeEmptyTankMiles = 20.0;
+
     };
 
     Vehicle.prototype = {
@@ -14885,11 +14901,14 @@ var Vehicle = (function() {
 
         },
 
-        maxRange: function(meters) {
+        maxRange: function(meters, stopPriorToEmptyTank) {
+
             if (meters) {
-                return this.epaCombinedMpg * this.fuelCapacity * 1609.34;
+                stopPriorToEmptyTank = (typeof stopPriorToEmptyTank === 'undefined') ? this.defaultStopBeforeEmptyTankMeters : stopPriorToEmptyTank;
+                return this.epaCombinedMpg * this.fuelCapacity * 1609.34 - stopPriorToEmptyTank;
             } else {
-                return this.epaCombinedMpg * this.fuelCapacity;
+                stopPriorToEmptyTank = (typeof stopPriorToEmptyTank === 'undefined') ? this.defaultStopBeforeEmptyTankMiles : stopPriorToEmptyTank;
+                return this.epaCombinedMpg * this.fuelCapacity - stopPriorToEmptyTank;
             }
         },
 
@@ -15516,22 +15535,6 @@ var Persistence = (function() {
 })();
 var DEBUG = true;
 
-$.fn.serializeObject = function() {
-    var e = {};
-    var t = this.serializeArray();
-    $.each(t, function() {
-        if (e[this.name]) {
-            if (!e[this.name].push) {
-                e[this.name] = [e[this.name]]
-            }
-            e[this.name].push(this.value || "")
-        } else {
-            e[this.name] = this.value || ""
-        }
-    });
-    return e;
-}
-
 $(function() {
     $('.dropdown-menu form').click(function(e) {
         e.stopPropagation();
@@ -15543,10 +15546,10 @@ $(function() {
             return;
         }
 
-        var markerGenerator;
-
         // Main objects and services
-        var tripCost = new TripCost('map-canvas', google);
+        var tripCost, fuelEconomy, persistentStorage, gasFeed, markerGenerator, edmunds;
+
+        tripCost = new TripCost('map-canvas', google);
 
         tripCost.initialize(function() {
             // after initialization...
@@ -15558,9 +15561,9 @@ $(function() {
         var selectMenu = $('#directions-form select[name="vehicle"]');
         var listMenu = $('#nav-vehicle-list');
 
-        var edmunds = new EDMUNDSAPI('qgtgm3apuq3fjkbfnzmmksnt');
+        edmunds = new EDMUNDSAPI('qgtgm3apuq3fjkbfnzmmksnt');
 
-        var fuelEconomy = new FuelEconomy(jQuery, edmunds);
+        fuelEconomy = new FuelEconomy(jQuery, edmunds);
         fuelEconomy.setSpinner('.add-vehicle-spinner');
 
         fuelEconomy.menus.year = $('select#add-vehicle-year');
@@ -15603,9 +15606,9 @@ $(function() {
         // Persistent storage.
         // Can swap out for localStorage, cookie, or server interface
         // Just need to implement methods set(), get(), and delete()
-        var persistentStorage = new Persistence(localStorage);
+        persistentStorage = new Persistence(localStorage);
 
-        var gasFeed = new GasFeed($, moment);
+        gasFeed = new GasFeed($, moment);
 
         var directionsForm = {
             start: $('#directions-form input[name="start"]'),
@@ -15675,6 +15678,7 @@ $(function() {
                     // Close all active menus
                     closeMenus();
 
+                    // Get the trip's start geolocation
                     var initialLocation = tripCost.startLocation(trip);
 
                     // Assign a default in case the vehicle's range is 0
@@ -15682,10 +15686,13 @@ $(function() {
 
                     var callbackWhenMarkerGeneratorFinished = function(markers) {
 
+                        // Receives an array of ajax calls
                         var gasStationAjaxObjects = gasFeed.findAllGasStations(initialLocation, markers);
 
+                        // Deferred objects takes care of synchronizing calls and providing one callback when all have completed
                         $.when.all(gasStationAjaxObjects).done(function(allStations) {
 
+                            // Calculate the trip cost
                             var totals = tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange);
 
                             $('#results-container').html(TripCostTemplates.results({
