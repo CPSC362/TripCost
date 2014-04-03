@@ -14329,7 +14329,7 @@ var MarkerGenerator = (function() {
 
     MarkerGenerator.prototype = {
 
-        routeHandler: function(directions, maxVehicleDistance, callbackForMarker, callbackForAllMarkers) {
+        routeHandler: function(directions, maxVehicleDistance, callbackForAllMarkers) {
 
             // Get the primary route from the directions object
             var route = directions.routes[0];
@@ -14392,11 +14392,6 @@ var MarkerGenerator = (function() {
 
                     // Push the marker to an array to pass to the finished callback
                     markers.push(marker);
-
-                    // If a callback is specified, run the callback against each point
-                    if (typeof callbackForMarker === "function") {
-                        callbackForMarker(point, i, totalPoints);
-                    }
                 }
             }
 
@@ -14640,25 +14635,44 @@ var TripCost = (function() {
             });
         },
 
-        getTripInformation: function(params, jQuery) {
+        calculateAllTheThings: function(trip, allStations, gasFeed, markerGenerator, maxRange) {
 
-            if (params == null || !params.hasOwnProperty('vehicle') || !params.hasOwnProperty('directions')) {
-                throw "getTripInformation() requires a parameter object with vehicle and directions properties";
-            }
-
-            if (!jQuery) {
-                throw "getTripInformation() requires jQuery";
-            }
-
-            jQuery.ajax({
-                url: '/vehicle-information',
-                type: 'get',
-                dataType: 'json',
-                data: params,
-                success: function(data, textStatus) {
-                    console.log(data);
-                }
+            var gasPrices = gasFeed.allGasPricesByCheapest(allStations, function(stations) {
+                markerGenerator.gasStationHandler(stations)
             });
+
+            var distance = this.totalDistance(trip, true),
+                distancePartials = this.distanceChunks(distance, maxRange),
+                averageFuelCost = gasFeed.averageCost(gasPrices),
+                fuelCost,
+                epaCost,
+                egeCost,
+                distanceInMiles,
+                totals = {
+                    epaTotalCost: 0,
+                    egeTotalCost: 0
+                };
+
+            for (var i = 0, s = distancePartials.length; i < s; ++i) {
+                fuelCost = gasPrices.shift() || averageFuelCost;
+
+                distanceInMiles = markerGenerator.metersToMiles(distancePartials[i]);
+
+                epaCost = (distanceInMiles / this.vehicle.epaCombinedMpg) * fuelCost;
+                DEBUG && console.log("(" + distanceInMiles + " / " + this.vehicle.epaCombinedMpg + ") * " + fuelCost);
+                egeCost = (distanceInMiles / this.vehicle.egeCombinedMpg) * fuelCost;
+
+                DEBUG && console.log("EPA cost partial: ", epaCost, "Based on fuel cost: ", fuelCost);
+
+                totals.epaTotalCost += epaCost;
+                totals.egeTotalCost += egeCost;
+            }
+
+            return totals;
+        },
+
+        startLocation: function(googleDirections) {
+            return googleDirections.routes[0].legs[0].start_location;
         },
 
         addVehicle: function(vehicle) {
@@ -14762,13 +14776,42 @@ var TripCost = (function() {
                 this.vehicles.splice(i, 1);
 
                 for (var i = 0, s = this._deleteVehicleMenuListeners.length; i < s; ++i) {
-                    console.log(theVehicle);
+                    DEBUG && console.log(theVehicle);
                     this._deleteVehicleMenuListeners[i](theVehicle);
                 }
 
                 callbackWhenDeleteFinished(theVehicle);
 
             }
+        },
+
+        totalDistance: function(trip, meters) {
+
+            var distance = 0;
+
+            for (var i = 0, s = trip.routes.length; i < s; ++i) {
+                for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
+                    distance += trip.routes[i].legs[j].distance.value;
+                }
+            }
+
+            return (meters) ? distance : distance * 0.000621371;
+        },
+
+        distanceChunks: function(totalRemainingDistance, maxVehicleDistance) {
+
+            DEBUG && console.log("(distance chunks) distance: ", totalRemainingDistance, "maxVehicleDistance: ", maxVehicleDistance);
+            var distanceChunks = [];
+
+            while (totalRemainingDistance - maxVehicleDistance > 0) {
+                distanceChunks.push(maxVehicleDistance);
+                totalRemainingDistance -= maxVehicleDistance;
+            }
+
+            distanceChunks.push(totalRemainingDistance);
+            DEBUG && console.log(distanceChunks);
+
+            return distanceChunks;
         },
 
         getVehicleById: function(vehicleId) {
@@ -15269,12 +15312,12 @@ var GasFeed = (function() {
 
         cheapestGas: function(stations) {
 
-            console.log("Cheapest gas stations: ", stations);
+            DEBUG && console.log("Cheapest gas stations: ", stations);
 
             if (stations.length === 0) return null;
 
             var cheapest = parseFloat(stations[0].price);
-            console.log("First station: ", cheapest);
+            DEBUG && console.log("First station: ", cheapest);
 
             for (var i = 1, s = stations.length; i < s; ++i) {
                 var price = parseFloat(stations[i].price);
@@ -15282,7 +15325,64 @@ var GasFeed = (function() {
             }
 
             return cheapest;
+        },
+
+        averageCost: function(gasPrices) {
+
+            var totalCost = 0,
+                count = 0;
+
+            for (var i = 0, s = gasPrices.length; i < s; ++i) {
+                if (gasPrices[i] !== null && gasPrices[i] !== 0) {
+                    totalCost += parseFloat(gasPrices[i]);
+                    ++count;
+                }
+            }
+
+            return totalCost / count;
+        },
+
+        findAllGasStations: function(initialLocation, markers) {
+
+            var gasStationAjaxObjects = [];
+
+            // Push the initial location as a "gas station" to get the initial gas price
+            gasStationAjaxObjects.push(this.getStations({
+                latitude: initialLocation.lat(),
+                longitude: initialLocation.lng()
+            }));
+
+            // Push all the other markers' gas stations
+            for (var i = 0, s = markers.length; i < s; ++i) {
+                gasStationAjaxObjects.push(this.getStations({
+                    latitude: markers[i].position.lat(),
+                    longitude: markers[i].position.lng()
+                }));
+            }
+
+            return gasStationAjaxObjects;
+        },
+
+        allGasPricesByCheapest: function(allStations, callbackForNonInitialMarkers) {
+
+            var gasPrices = [];
+
+            for (var i = 0, s = allStations.length; i < s; ++i) {
+                var stations = this.parseStations(allStations[i][0].stations);
+                var cheapestGasStation = this.cheapestGas(stations);
+
+                // Ignore the initial location
+                if (i !== 0) {
+                    callbackForNonInitialMarkers(stations);
+                }
+
+                gasPrices.push(cheapestGasStation);
+            }
+
+            return gasPrices;
         }
+
+
     };
 
     return GasFeed;
@@ -15429,7 +15529,7 @@ $.fn.serializeObject = function() {
             e[this.name] = this.value || ""
         }
     });
-    return e
+    return e;
 }
 
 $(function() {
@@ -15575,73 +15675,30 @@ $(function() {
                     // Close all active menus
                     closeMenus();
 
-                    var distance = 0;
+                    var initialLocation = tripCost.startLocation(trip);
 
                     // Assign a default in case the vehicle's range is 0
                     var maxRange = tripCost.vehicle.maxRange(true) || 482803.0;
 
-                    var gasPrices = new Array();
-
-                    var callbackWhenGasStationsFinished = function(allGasStations) {
-                        DEBUG && console.log("Trip: ", trip);
-
-                        for (var i = 0, s = trip.routes.length; i < s; ++i) {
-                            for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
-                                distance += trip.routes[i].legs[j].distance.value;
-                            }
-                        }
-
-                        distanceInMiles = distance * 0.000621371;
-
-                        var epaCost = (distanceInMiles / tripCost.vehicle.epaCombinedMpg) * gasPrice;
-                        var egeCost = (distanceInMiles / tripCost.vehicle.egeCombinedMpg) * gasPrice;
-
-                        DEBUG && console.log("Vehicle for route: ", tripCost.vehicle);
-
-                        // List of available vehicles in navigation bar
-                        $('#results-container').html(TripCostTemplates.results({
-                            epa: epaCost,
-                            ege: egeCost,
-                            mainImage: tripCost.vehicle.mainImage,
-                            name: tripCost.vehicle.name
-                        }));
-                    };
-
                     var callbackWhenMarkerGeneratorFinished = function(markers) {
 
-                        var gasStationAjaxObjects = [];
-
-                        for (var i = 0, s = markers.length; i < s; ++i) {
-                            gasStationAjaxObjects.push(gasFeed.getStations({
-                                latitude: markers[i].position.lat(),
-                                longitude: markers[i].position.lng()
-                            }));
-                        }
+                        var gasStationAjaxObjects = gasFeed.findAllGasStations(initialLocation, markers);
 
                         $.when.all(gasStationAjaxObjects).done(function(allStations) {
 
-                            var stations, cheapestGasStation;
+                            var totals = tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange);
 
-                            for (var i = 0, s = allStations.length; i < s; ++i) {
-                                stations = gasFeed.parseStations(allStations[i][0].stations);
-                                cheapestGasStation = gasFeed.cheapestGas(stations);
+                            $('#results-container').html(TripCostTemplates.results({
+                                epa: totals.epaTotalCost,
+                                ege: totals.egeTotalCost,
+                                mainImage: tripCost.vehicle.mainImage,
+                                name: tripCost.vehicle.name
+                            }));
 
-                                markerGenerator.gasStationHandler(stations);
-                                gasPrices.push(cheapestGasStation);
-
-                            }
-
-                            // Now we have an array of all the gas stations, can caluclate cost for each
                         });
                     };
 
-                    markerGenerator.routeHandler(trip, maxRange, null, callbackWhenMarkerGeneratorFinished);
-
-
-
-                    var gasPrice = 3.90;
-
-
+                    markerGenerator.routeHandler(trip, maxRange, callbackWhenMarkerGeneratorFinished);
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));

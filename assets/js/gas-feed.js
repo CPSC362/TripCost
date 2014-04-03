@@ -76,12 +76,12 @@ var GasFeed = (function() {
 
         cheapestGas: function(stations) {
 
-            console.log("Cheapest gas stations: ", stations);
+            DEBUG && console.log("Cheapest gas stations: ", stations);
 
             if (stations.length === 0) return null;
 
             var cheapest = parseFloat(stations[0].price);
-            console.log("First station: ", cheapest);
+            DEBUG && console.log("First station: ", cheapest);
 
             for (var i = 1, s = stations.length; i < s; ++i) {
                 var price = parseFloat(stations[i].price);
@@ -89,7 +89,64 @@ var GasFeed = (function() {
             }
 
             return cheapest;
+        },
+
+        averageCost: function(gasPrices) {
+
+            var totalCost = 0,
+                count = 0;
+
+            for (var i = 0, s = gasPrices.length; i < s; ++i) {
+                if (gasPrices[i] !== null && gasPrices[i] !== 0) {
+                    totalCost += parseFloat(gasPrices[i]);
+                    ++count;
+                }
+            }
+
+            return totalCost / count;
+        },
+
+        findAllGasStations: function(initialLocation, markers) {
+
+            var gasStationAjaxObjects = [];
+
+            // Push the initial location as a "gas station" to get the initial gas price
+            gasStationAjaxObjects.push(this.getStations({
+                latitude: initialLocation.lat(),
+                longitude: initialLocation.lng()
+            }));
+
+            // Push all the other markers' gas stations
+            for (var i = 0, s = markers.length; i < s; ++i) {
+                gasStationAjaxObjects.push(this.getStations({
+                    latitude: markers[i].position.lat(),
+                    longitude: markers[i].position.lng()
+                }));
+            }
+
+            return gasStationAjaxObjects;
+        },
+
+        allGasPricesByCheapest: function(allStations, callbackForNonInitialMarkers) {
+
+            var gasPrices = [];
+
+            for (var i = 0, s = allStations.length; i < s; ++i) {
+                var stations = this.parseStations(allStations[i][0].stations);
+                var cheapestGasStation = this.cheapestGas(stations);
+
+                // Ignore the initial location
+                if (i !== 0) {
+                    callbackForNonInitialMarkers(stations);
+                }
+
+                gasPrices.push(cheapestGasStation);
+            }
+
+            return gasPrices;
         }
+
+
     };
 
     return GasFeed;

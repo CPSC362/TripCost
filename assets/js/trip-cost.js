@@ -132,25 +132,44 @@ var TripCost = (function() {
             });
         },
 
-        getTripInformation: function(params, jQuery) {
+        calculateAllTheThings: function(trip, allStations, gasFeed, markerGenerator, maxRange) {
 
-            if (params == null || !params.hasOwnProperty('vehicle') || !params.hasOwnProperty('directions')) {
-                throw "getTripInformation() requires a parameter object with vehicle and directions properties";
-            }
-
-            if (!jQuery) {
-                throw "getTripInformation() requires jQuery";
-            }
-
-            jQuery.ajax({
-                url: '/vehicle-information',
-                type: 'get',
-                dataType: 'json',
-                data: params,
-                success: function(data, textStatus) {
-                    console.log(data);
-                }
+            var gasPrices = gasFeed.allGasPricesByCheapest(allStations, function(stations) {
+                markerGenerator.gasStationHandler(stations)
             });
+
+            var distance = this.totalDistance(trip, true),
+                distancePartials = this.distanceChunks(distance, maxRange),
+                averageFuelCost = gasFeed.averageCost(gasPrices),
+                fuelCost,
+                epaCost,
+                egeCost,
+                distanceInMiles,
+                totals = {
+                    epaTotalCost: 0,
+                    egeTotalCost: 0
+                };
+
+            for (var i = 0, s = distancePartials.length; i < s; ++i) {
+                fuelCost = gasPrices.shift() || averageFuelCost;
+
+                distanceInMiles = markerGenerator.metersToMiles(distancePartials[i]);
+
+                epaCost = (distanceInMiles / this.vehicle.epaCombinedMpg) * fuelCost;
+                DEBUG && console.log("(" + distanceInMiles + " / " + this.vehicle.epaCombinedMpg + ") * " + fuelCost);
+                egeCost = (distanceInMiles / this.vehicle.egeCombinedMpg) * fuelCost;
+
+                DEBUG && console.log("EPA cost partial: ", epaCost, "Based on fuel cost: ", fuelCost);
+
+                totals.epaTotalCost += epaCost;
+                totals.egeTotalCost += egeCost;
+            }
+
+            return totals;
+        },
+
+        startLocation: function(googleDirections) {
+            return googleDirections.routes[0].legs[0].start_location;
         },
 
         addVehicle: function(vehicle) {
@@ -254,13 +273,42 @@ var TripCost = (function() {
                 this.vehicles.splice(i, 1);
 
                 for (var i = 0, s = this._deleteVehicleMenuListeners.length; i < s; ++i) {
-                    console.log(theVehicle);
+                    DEBUG && console.log(theVehicle);
                     this._deleteVehicleMenuListeners[i](theVehicle);
                 }
 
                 callbackWhenDeleteFinished(theVehicle);
 
             }
+        },
+
+        totalDistance: function(trip, meters) {
+
+            var distance = 0;
+
+            for (var i = 0, s = trip.routes.length; i < s; ++i) {
+                for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
+                    distance += trip.routes[i].legs[j].distance.value;
+                }
+            }
+
+            return (meters) ? distance : distance * 0.000621371;
+        },
+
+        distanceChunks: function(totalRemainingDistance, maxVehicleDistance) {
+
+            DEBUG && console.log("(distance chunks) distance: ", totalRemainingDistance, "maxVehicleDistance: ", maxVehicleDistance);
+            var distanceChunks = [];
+
+            while (totalRemainingDistance - maxVehicleDistance > 0) {
+                distanceChunks.push(maxVehicleDistance);
+                totalRemainingDistance -= maxVehicleDistance;
+            }
+
+            distanceChunks.push(totalRemainingDistance);
+            DEBUG && console.log(distanceChunks);
+
+            return distanceChunks;
         },
 
         getVehicleById: function(vehicleId) {

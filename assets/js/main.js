@@ -13,7 +13,7 @@ $.fn.serializeObject = function() {
             e[this.name] = this.value || ""
         }
     });
-    return e
+    return e;
 }
 
 $(function() {
@@ -159,73 +159,30 @@ $(function() {
                     // Close all active menus
                     closeMenus();
 
-                    var distance = 0;
+                    var initialLocation = tripCost.startLocation(trip);
 
                     // Assign a default in case the vehicle's range is 0
                     var maxRange = tripCost.vehicle.maxRange(true) || 482803.0;
 
-                    var gasPrices = new Array();
-
-                    var callbackWhenGasStationsFinished = function(allGasStations) {
-                        DEBUG && console.log("Trip: ", trip);
-
-                        for (var i = 0, s = trip.routes.length; i < s; ++i) {
-                            for (var j = 0, t = trip.routes[i].legs.length; j < t; ++j) {
-                                distance += trip.routes[i].legs[j].distance.value;
-                            }
-                        }
-
-                        distanceInMiles = distance * 0.000621371;
-
-                        var epaCost = (distanceInMiles / tripCost.vehicle.epaCombinedMpg) * gasPrice;
-                        var egeCost = (distanceInMiles / tripCost.vehicle.egeCombinedMpg) * gasPrice;
-
-                        DEBUG && console.log("Vehicle for route: ", tripCost.vehicle);
-
-                        // List of available vehicles in navigation bar
-                        $('#results-container').html(TripCostTemplates.results({
-                            epa: epaCost,
-                            ege: egeCost,
-                            mainImage: tripCost.vehicle.mainImage,
-                            name: tripCost.vehicle.name
-                        }));
-                    };
-
                     var callbackWhenMarkerGeneratorFinished = function(markers) {
 
-                        var gasStationAjaxObjects = [];
-
-                        for (var i = 0, s = markers.length; i < s; ++i) {
-                            gasStationAjaxObjects.push(gasFeed.getStations({
-                                latitude: markers[i].position.lat(),
-                                longitude: markers[i].position.lng()
-                            }));
-                        }
+                        var gasStationAjaxObjects = gasFeed.findAllGasStations(initialLocation, markers);
 
                         $.when.all(gasStationAjaxObjects).done(function(allStations) {
 
-                            var stations, cheapestGasStation;
+                            var totals = tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange);
 
-                            for (var i = 0, s = allStations.length; i < s; ++i) {
-                                stations = gasFeed.parseStations(allStations[i][0].stations);
-                                cheapestGasStation = gasFeed.cheapestGas(stations);
+                            $('#results-container').html(TripCostTemplates.results({
+                                epa: totals.epaTotalCost,
+                                ege: totals.egeTotalCost,
+                                mainImage: tripCost.vehicle.mainImage,
+                                name: tripCost.vehicle.name
+                            }));
 
-                                markerGenerator.gasStationHandler(stations);
-                                gasPrices.push(cheapestGasStation);
-
-                            }
-
-                            // Now we have an array of all the gas stations, can caluclate cost for each
                         });
                     };
 
-                    markerGenerator.routeHandler(trip, maxRange, null, callbackWhenMarkerGeneratorFinished);
-
-
-
-                    var gasPrice = 3.90;
-
-
+                    markerGenerator.routeHandler(trip, maxRange, callbackWhenMarkerGeneratorFinished);
                 },
                 error: function(result, status) {
                     directionsForm.routeError.html(tripCost.errorMessage(status));

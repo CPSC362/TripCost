@@ -63,7 +63,7 @@ var MarkerGenerator = (function() {
 
     MarkerGenerator.prototype = {
 
-        routeHandler: function(directions, maxVehicleDistance, callbackForMarker, callbackForAllMarkers) {
+        routeHandler: function(directions, maxVehicleDistance, callbackForAllMarkers) {
 
             // Get the primary route from the directions object
             var route = directions.routes[0];
@@ -126,11 +126,6 @@ var MarkerGenerator = (function() {
 
                     // Push the marker to an array to pass to the finished callback
                     markers.push(marker);
-
-                    // If a callback is specified, run the callback against each point
-                    if (typeof callbackForMarker === "function") {
-                        callbackForMarker(point, i, totalPoints);
-                    }
                 }
             }
 

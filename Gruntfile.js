@@ -84,8 +84,7 @@ module.exports = function(grunt) {
                 'concat:css',
                 'cssmin:css',
                 'handlebars',
-                'concat:js',
-                'uglify:js'
+                'concat:js'
             ],
             options: {
                 livereload: true
