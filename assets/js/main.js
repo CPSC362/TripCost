@@ -143,6 +143,9 @@ $(function() {
                     // Close all active menus
                     closeMenus();
 
+                    // Clear the map markers off the display
+                    markerGenerator.clearMarkers();
+
                     // Get the trip's start geolocation
                     var initialLocation = tripCost.startLocation(trip);
 
@@ -156,6 +159,11 @@ $(function() {
 
                         // Deferred objects takes care of synchronizing calls and providing one callback when all have completed
                         $.when.all(gasStationAjaxObjects).done(function(allStations) {
+
+                            if (allStations.length === 3 && typeof allStations[0] === "object" && typeof allStations[1] === "string" && typeof allStations[2] === "object") {
+                                // tripCost.calculateAllTheThings expects allStations as a 2 dimensional array
+                                allStations = [allStations];
+                            }
 
                             // Calculate the trip cost
                             var totals = tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange);

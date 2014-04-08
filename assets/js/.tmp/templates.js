@@ -53,7 +53,7 @@ function program3(depth0,data) {
   if (helper = helpers.name) { stack1 = helper.call(depth0, {hash:{},data:data}); }
   else { helper = (depth0 && depth0.name); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
-    + "\">\n    </a>\n  </div>\n  <div class=\"col-md-6\">\n    <div class=\"panel panel-default\">\n      <div class=\"panel-heading\">\n        <h3 class=\"panel-title\">Cost Analysis</h3>\n      </div>\n      <div class=\"panel-body\">\n          ";
+    + "\">\n    </a>\n  </div>\n  <div class=\"col-md-6\">\n    <div class=\"panel panel-default\">\n      <div class=\"panel-heading\">\n        <h3 class=\"panel-title\">Trip Analysis</h3>\n      </div>\n      <div class=\"panel-body\">\n          ";
   stack1 = helpers['if'].call(depth0, (depth0 && depth0.epa), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n          ";

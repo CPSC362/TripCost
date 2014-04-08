@@ -12,6 +12,13 @@ var GasFeed = (function() {
 
     var MAX_GAS_STATIONS = 5;
 
+    var DEFAULT_GAS_STATION_DISTANCE = 10;
+
+    var DEFAULT_GAS_TYPE = 'reg';
+
+    var DEFAULT_GAS_STATION_SORT = 'price';
+
+
     // Constructor method
     function GasFeed(jQuery, momentJS) {
 
@@ -41,9 +48,9 @@ var GasFeed = (function() {
     GasFeed.prototype = {
 
         getStations: function(options, callbackWhenFinished) {
-            if (typeof options.distance == "undefined") options.distance = 5;
-            if (typeof options.fuelType == "undefined") options.fuelType = 'reg';
-            if (typeof options.sortBy == "undefined") options.sortBy = 'price';
+            if (typeof options.distance == "undefined") options.distance = DEFAULT_GAS_STATION_DISTANCE;
+            if (typeof options.fuelType == "undefined") options.fuelType = DEFAULT_GAS_TYPE;
+            if (typeof options.sortBy == "undefined") options.sortBy = DEFAULT_GAS_STATION_SORT;
 
             var self = this;
 
@@ -132,6 +139,7 @@ var GasFeed = (function() {
             var gasPrices = [];
 
             for (var i = 0, s = allStations.length; i < s; ++i) {
+
                 var stations = this.parseStations(allStations[i][0].stations);
                 var cheapestGasStation = this.cheapestGas(stations);
 
@@ -141,6 +149,7 @@ var GasFeed = (function() {
                 }
 
                 gasPrices.push(cheapestGasStation);
+
             }
 
             return gasPrices;

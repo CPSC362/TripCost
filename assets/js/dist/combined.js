@@ -15267,6 +15267,13 @@ var GasFeed = (function() {
 
     var MAX_GAS_STATIONS = 5;
 
+    var DEFAULT_GAS_STATION_DISTANCE = 10;
+
+    var DEFAULT_GAS_TYPE = 'reg';
+
+    var DEFAULT_GAS_STATION_SORT = 'price';
+
+
     // Constructor method
     function GasFeed(jQuery, momentJS) {
 
@@ -15296,9 +15303,9 @@ var GasFeed = (function() {
     GasFeed.prototype = {
 
         getStations: function(options, callbackWhenFinished) {
-            if (typeof options.distance == "undefined") options.distance = 5;
-            if (typeof options.fuelType == "undefined") options.fuelType = 'reg';
-            if (typeof options.sortBy == "undefined") options.sortBy = 'price';
+            if (typeof options.distance == "undefined") options.distance = DEFAULT_GAS_STATION_DISTANCE;
+            if (typeof options.fuelType == "undefined") options.fuelType = DEFAULT_GAS_TYPE;
+            if (typeof options.sortBy == "undefined") options.sortBy = DEFAULT_GAS_STATION_SORT;
 
             var self = this;
 
@@ -15387,6 +15394,7 @@ var GasFeed = (function() {
             var gasPrices = [];
 
             for (var i = 0, s = allStations.length; i < s; ++i) {
+
                 var stations = this.parseStations(allStations[i][0].stations);
                 var cheapestGasStation = this.cheapestGas(stations);
 
@@ -15396,6 +15404,7 @@ var GasFeed = (function() {
                 }
 
                 gasPrices.push(cheapestGasStation);
+
             }
 
             return gasPrices;
@@ -15678,6 +15687,9 @@ $(function() {
                     // Close all active menus
                     closeMenus();
 
+                    // Clear the map markers off the display
+                    markerGenerator.clearMarkers();
+
                     // Get the trip's start geolocation
                     var initialLocation = tripCost.startLocation(trip);
 
@@ -15691,6 +15703,11 @@ $(function() {
 
                         // Deferred objects takes care of synchronizing calls and providing one callback when all have completed
                         $.when.all(gasStationAjaxObjects).done(function(allStations) {
+
+                            if (allStations.length === 3 && typeof allStations[0] === "object" && typeof allStations[1] === "string" && typeof allStations[2] === "object") {
+                                // tripCost.calculateAllTheThings expects allStations as a 2 dimensional array
+                                allStations = [allStations];
+                            }
 
                             // Calculate the trip cost
                             var totals = tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange);
@@ -15893,7 +15910,7 @@ function program3(depth0,data) {
   if (helper = helpers.name) { stack1 = helper.call(depth0, {hash:{},data:data}); }
   else { helper = (depth0 && depth0.name); stack1 = typeof helper === functionType ? helper.call(depth0, {hash:{},data:data}) : helper; }
   buffer += escapeExpression(stack1)
-    + "\">\n    </a>\n  </div>\n  <div class=\"col-md-6\">\n    <div class=\"panel panel-default\">\n      <div class=\"panel-heading\">\n        <h3 class=\"panel-title\">Cost Analysis</h3>\n      </div>\n      <div class=\"panel-body\">\n          ";
+    + "\">\n    </a>\n  </div>\n  <div class=\"col-md-6\">\n    <div class=\"panel panel-default\">\n      <div class=\"panel-heading\">\n        <h3 class=\"panel-title\">Trip Analysis</h3>\n      </div>\n      <div class=\"panel-body\">\n          ";
   stack1 = helpers['if'].call(depth0, (depth0 && depth0.epa), {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n          ";
