@@ -260,14 +260,38 @@ $(function() {
             }
         });
 
-        $('a[href="#top"]').click(function(e) {
+        $(document).on('click', 'a[href="#top"]', function(e) {
             e.preventDefault();
 
             closeMenus();
 
             $('html, body').animate({
-                scrollTop: $("html").top
+                scrollTop: $('html').offset().top
             }, 500);
+        });
+
+        $('a.start-current-location').click(function(e) {
+            e.preventDefault();
+
+            tripCost.currentLocation($, $(this), $('input#start'));
+        });
+
+        $('a.destination-current-location').click(function(e) {
+            e.preventDefault();
+
+            tripCost.currentLocation($, $(this), $('input#destination'));
+        });
+
+        $('input#start, input#destination').keyup(function(e) {
+
+            var input = $(this).attr('id');
+
+            $(this).removeClass('active');
+            $('a.' + input + '-current-location').removeClass('active');
+
+            tripCost[input + 'UserLocation'] = null;
+
+            console.log(tripCost);
         });
 
         $('#nav-vehicle-list a').click(function(e) {

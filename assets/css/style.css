@@ -40,10 +40,19 @@ body {
   padding: 10px 12px;
   pointer-events: none;
 }
-.vehicle-select {
-  border:none;
-  background-color:white;
+
+.start-current-location, .destination-current-location {
+  color: #000;
 }
+
+.active {
+  color: #3275C1;
+}
+
+.error {
+  color: #993031;
+}
+
 /* ///////////////// */
 
 .form-container {

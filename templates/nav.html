@@ -21,16 +21,24 @@
             <form id="directions-form" action="#" method="#" accept-charset="UTF-8">
               
               <div class="form-group">
-                <div class="left-inner-addon">
-                  <i class="fa fa-location-arrow"></i>
+                <div class="input-group">
+                  <span class="input-group-addon">
+                    <a href="#" class="start-current-location" title="Click to use current location...">
+                      <i class="fa fa-location-arrow"></i>
+                    </a>
+                  </span>
                   <input type="text" name="start" id="start" placeholder="Start..." class="form-control" value="Chicago, IL" />
                   <span class="start-error label label-danger"></span>
                 </div>
               </div>
               
               <div class="form-group">
-                <div class="left-inner-addon">
-                  <i class="fa fa-crosshairs"></i>
+                <div class="input-group">
+                  <span class="input-group-addon">
+                    <a href="#" class="destination-current-location" title="Click to use current location...">
+                      <i class="fa fa-crosshairs"></i>
+                    </a>
+                  </span>
                   <input type="text" name="destination" id="destination" placeholder="Destination..." class="form-control" value="Los Angeles, CA" />
                   <span class="destination-error label label-danger"></span>
                 </div>

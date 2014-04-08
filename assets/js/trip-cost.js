@@ -17,6 +17,8 @@
 
 var TripCost = (function() {
 
+    var CURRENT_LOCATION_PROMPT = 'Current location...';
+
     // Constructor method
     function TripCost(domId, google) {
 
@@ -47,6 +49,10 @@ var TripCost = (function() {
         this._deleteVehicleMenuListeners = new Array();
 
         this._spinner = null;
+
+        this.startUserLocation = null;
+
+        this.destinationUserLocation = null;
     };
 
     TripCost.prototype = {
@@ -84,6 +90,42 @@ var TripCost = (function() {
             });
         },
 
+        currentLocation: function(jQuery, buttonElement, inputElement) {
+
+            var classes = {
+                active: 'active',
+                spinner: 'fa fa-spinner fa-spin',
+                locationIcon: buttonElement.find('i').attr('class'),
+                error: 'fa fa-times error'
+            };
+
+            var self = this;
+
+            if (!buttonElement.hasClass(classes.active)) {
+
+                buttonElement.addClass(classes.active).find('i').removeClass().addClass(classes.spinner);
+                inputElement.addClass(classes.active);
+
+                jQuery.geolocation.get({
+                    success: function(position) {
+                        inputElement.val(CURRENT_LOCATION_PROMPT);
+                        buttonElement.find('i').removeClass().addClass(classes.locationIcon);
+
+                        self[inputElement.attr('id') + 'UserLocation'] = position;
+                    },
+                    error: function() {
+                        buttonElement.find('i').removeClass().addClass(classes.error);
+                    }
+                });
+
+            } else {
+
+                buttonElement.removeClass(classes.active);
+                inputElement.removeClass(classes.active).val('');
+
+            }
+        },
+
         /*
         |--------------------------------------------------------------------------
         | Get directions for the user
@@ -101,6 +143,16 @@ var TripCost = (function() {
             this.directionsDisplay.setMap(this.map);
 
             this.loading(true);
+
+            if (start === CURRENT_LOCATION_PROMPT && this.startUserLocation !== null) {
+                start = this.startUserLocation.coords.latitude + ',' + this.startUserLocation.coords.longitude;
+            }
+
+            if (destination === CURRENT_LOCATION_PROMPT && this.destinationUserLocation !== null) {
+                destination = this.destinationUserLocation.coords.latitude + ',' + this.destinationUserLocation.coords.longitude;
+            }
+
+            DEBUG && console.log("start: ", start, "destination: ", destination);
 
             var request = {
                 origin: start,

@@ -18,6 +18,7 @@ module.exports = function(grunt) {
                     'bower_components/bootstrap/dist/js/bootstrap.js',
                     'bower_components/handlebars/handlebars.runtime.js',
                     'bower_components/momentjs/moment.js',
+                    'bower_components/jquery-geolocation/jquery.geolocation.js',
 
                     // Vendor (outside bower) JS
                     'assets/js/vendor/v3_epoly.js',
