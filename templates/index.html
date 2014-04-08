@@ -21,7 +21,7 @@
 {% endblock styles %}
 
 {% block scripts %}
-<script src="//maps.googleapis.com/maps/api/js?v=3&sensor=false&extension=.js"></script>
+<script src="//maps.googleapis.com/maps/api/js?v=3&amp;sensor=false&amp;extension=.js&amp;libraries=places"></script>
 <script src="{{url_for('.static', filename='js/dist/combined.js')}}"></script>
 {% endblock %}
 

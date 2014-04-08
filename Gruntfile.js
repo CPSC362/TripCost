@@ -13,13 +13,17 @@ module.exports = function(grunt) {
 
             js: {
                 src: [
-                    // Vendor JS
+                    // Bower Components
                     'bower_components/jquery/jquery.js',
                     'bower_components/bootstrap/dist/js/bootstrap.js',
                     'bower_components/handlebars/handlebars.runtime.js',
                     'bower_components/momentjs/moment.js',
+
+                    // Vendor (outside bower) JS
                     'assets/js/vendor/v3_epoly.js',
                     'assets/js/vendor/EdmundsAPI-sdk-javascript/edmunds.api.sdk.js',
+                    'assets/js/vendor/bootstrap-typeahead.js',
+                    'assets/js/vendor/jquery.places-search.js',
 
                     // Utility JS
                     'assets/js/handlebars-helpers.js',

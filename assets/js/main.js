@@ -253,6 +253,13 @@ $(function() {
             }, 500);
         });
 
+        $('input#start, input#destination').placesSearch({
+            onSelectAddress: function(result) {
+                tripCost.map.setCenter(result.geometry.location);
+                tripCost.map.setZoom(12);
+            }
+        });
+
         $('a[href="#top"]').click(function(e) {
             e.preventDefault();
 
