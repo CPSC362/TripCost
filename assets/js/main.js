@@ -52,6 +52,11 @@ $(function() {
             listMenu.html(TripCostTemplates.vehicles({
                 vehicles: vehicles
             }));
+
+            if ($('#select-vehicle option').length > 1) {
+                // There's vehicles to select from. Automatically select the 1st one
+                $('#select-vehicle :nth-child(2)').prop('selected', true);
+            }
         });
 
 
