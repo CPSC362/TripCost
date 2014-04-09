@@ -76,7 +76,7 @@ var TripCost = (function() {
                 self.directionsService = new self.googleProvider.maps.DirectionsService();
                 self.directionsDisplay = new self.googleProvider.maps.DirectionsRenderer();
 
-                var calStateFullerton = new self.googleProvider.maps.LatLng(33.8596069, -117.8867514);
+                var calStateFullerton = new self.googleProvider.maps.LatLng(33.8816707, -117.88542509999999);
 
                 // Initialize the map on the dom element to zoom level 15, centered
                 // on CSUF, and display using the standard roadmap
@@ -90,14 +90,18 @@ var TripCost = (function() {
             });
         },
 
-        currentLocation: function(jQuery, buttonElement, inputElement) {
+        currentLocation: function(jQuery, options) {
 
             var classes = {
                 active: 'active',
                 spinner: 'fa fa-spinner fa-spin',
-                locationIcon: buttonElement.find('i').attr('class'),
+                locationIcon: options.locationIcon,
                 error: 'fa fa-times error'
             };
+
+            var buttonElement = options.buttonElement,
+                inputElement = options.inputElement,
+                errorMessageElement = options.errorMessageElement;
 
             var self = this;
 
@@ -113,15 +117,20 @@ var TripCost = (function() {
 
                         self[inputElement.attr('id') + 'UserLocation'] = position;
                     },
-                    error: function() {
+                    error: function(response) {
+
+                        errorMessageElement.html(response.message);
                         buttonElement.find('i').removeClass().addClass(classes.error);
+                        inputElement.val(CURRENT_LOCATION_PROMPT).removeClass(classes.active).addClass(classes.error);
                     }
                 });
 
             } else {
 
+                errorMessageElement.html('');
                 buttonElement.removeClass(classes.active);
-                inputElement.removeClass(classes.active).val('');
+                buttonElement.find('i').removeClass().addClass(classes.locationIcon);
+                inputElement.removeClass(classes.active + ' ' + classes.error).val('');
 
             }
         },

@@ -278,21 +278,35 @@ $(function() {
         $('a.start-current-location').click(function(e) {
             e.preventDefault();
 
-            tripCost.currentLocation($, $(this), $('input#start'));
+            var options = {
+                buttonElement: $(this),
+                inputElement: $('input#start'),
+                errorMessageElement: $('.start-error'),
+                locationIcon: 'fa fa-location-arrow'
+            };
+
+            tripCost.currentLocation(jQuery, options);
         });
 
         $('a.destination-current-location').click(function(e) {
             e.preventDefault();
 
-            tripCost.currentLocation($, $(this), $('input#destination'));
+            var options = {
+                buttonElement: $(this),
+                inputElement: $('input#destination'),
+                errorMessageElement: $('.destination-error'),
+                locationIcon: 'fa fa-crosshairs'
+            };
+
+            tripCost.currentLocation(jQuery, options);
         });
 
         $('input#start, input#destination').keyup(function(e) {
 
             var input = $(this).attr('id');
 
-            $(this).removeClass('active');
-            $('a.' + input + '-current-location').removeClass('active');
+            $(this).removeClass('active error');
+            $('a.' + input + '-current-location').removeClass('active error');
 
             tripCost[input + 'UserLocation'] = null;
 
