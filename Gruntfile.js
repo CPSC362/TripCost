@@ -84,7 +84,7 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            files: ['assets/js/*', 'assets/css/*', 'assets/templates/*'],
+            files: ['assets/js/*', 'assets/css/*', 'assets/templates/*', 'templates/*'],
             tasks: [
                 'concat:css',
                 'cssmin:css',
