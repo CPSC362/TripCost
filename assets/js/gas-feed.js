@@ -34,10 +34,10 @@ var GasFeed = (function() {
         if (this.mode == 'production') {
             // mygasfeed.com API key
             this.apiKey = 'ka89irk0fm';
-            this.baseUrl = 'http://api.mygasfeed.com/';
+            this.baseUrl = '//api.mygasfeed.com/';
         } else {
             this.apiKey = 'rfej9napna';
-            this.baseUrl = 'http://devapi.mygasfeed.com/';
+            this.baseUrl = '//devapi.mygasfeed.com/';
         }
 
         // Gas station price update threshold
