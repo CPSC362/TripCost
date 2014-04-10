@@ -16040,7 +16040,8 @@ var GasFeed = (function() {
 | California State University, Fullerton CPSC 362
 | February 26, 2014
 | 
-| 
+| Requires storageInterface which is a function with the following
+| methods: getItem(key), setItem(key, object), removeItem(key)
 |
 */
 var Persistence = (function() {
