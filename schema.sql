@@ -1,6 +1,6 @@
 create table user
 (
-	UserID integer primary key,
+	UserID integer primary key autoincrement,
 	Username text not null default '',
 	Password varchar(65) not null default '',
 	FirstName text not null default '',
