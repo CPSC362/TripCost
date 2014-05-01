@@ -130,6 +130,26 @@ def close_db(error):
     if hasattr(g, 'sqlite_db'):
         g.sqlite_db.close()
 
+@app.route('/expenses')
+@login_required
+def showexpenses():
+    pass
+
+@app.route('/saveexpense')
+@login_required
+def saveexpense():
+    pass
+
+@app.route('/savevehicle')
+@login_required
+def savevehicle():
+    pass
+
+@app.route('/savetrip')
+@login_required
+def savetrip():
+    pass
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', debug=True, port=port)
