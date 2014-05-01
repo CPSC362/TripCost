@@ -6,7 +6,7 @@ from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
 from flaskext.gravatar import Gravatar
 from flask.ext.login import LoginManager, login_user, logout_user, \
-     login_required
+     current_user, login_required
 
 import json
 import requests
@@ -27,7 +27,7 @@ app = Flask(__name__, static_folder='assets')
 AppConfig(app, configFile)
 app.config['BOOTSTRAP_SERVE_LOCAL'] = True
 app.config['DATABASE'] = os.path.join(app.root_path, 'tripcost.db')
-app.config['SECRET_KEY'] = 'key'
+app.config['SECRET_KEY'] = 'jceeJNF42V4j4wJPwc8r'
 app.debug = True
 
 # Gravatar initialization
@@ -46,7 +46,8 @@ login_manager.init_app(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    is_logged_in = current_user.is_authenticated()
+    return render_template('index.html', is_logged_in=is_logged_in)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -61,7 +62,8 @@ def register():
             db.commit()
         
         return redirect( url_for('index') )
-    return render_template('register.html')
+    is_logged_in = current_user.is_authenticated()
+    return render_template('register.html', is_logged_in=is_logged_in)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -74,9 +76,7 @@ def login():
         cursor = db.execute("select * from user where Username=?", [email])
         row = cursor.fetchone()
         if row is not None:
-            print('valid email')
             if row['Password'] == password:
-                print('valid password')
                 user = load_user( unicode(row['UserID']) )
                 login_user(user, remember=remember)
     #return render_template('login.html')
@@ -91,7 +91,8 @@ def logout():
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    is_logged_in = current_user.is_authenticated()
+    return render_template('about.html', is_logged_in=is_logged_in)
 
 @app.route('/test')
 @login_required

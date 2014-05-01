@@ -1,7 +1,5 @@
-import sqlite3
-
 class TripCostUser:
-  
+    
     def __init__(self, id, email):
         self.id = id
         self.email = email

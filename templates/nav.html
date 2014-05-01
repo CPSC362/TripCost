@@ -72,6 +72,7 @@
         <li id="results-button"><a href="#results-container"><i class="fa fa-bar-chart-o"></i> Results</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
+      {% if not is_logged_in %}
         <li><a href="{{ url_for('register') }}">Sign Up</a></li>
         <li class="dropdown">
           
@@ -111,6 +112,9 @@
             </form>
           </ul>
         </li>
+      {% else %}
+        <li><a href="{{ url_for('logout') }}">Sign Out</a></li>
+      {% endif %}
       </ul>
     </div><!--/.nav-collapse -->
   </div>
