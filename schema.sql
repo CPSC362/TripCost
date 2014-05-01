@@ -10,9 +10,8 @@ create table user
 create table trip
 (
 	TripID integer primary key,
-	Origin blob,
-	Stops blob,
-	Destination blob,
+	Origin text,
+	Destination text,
 	StartDate text,
 	EndDate text,
 	TripOwner int not null,
