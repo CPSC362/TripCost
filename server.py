@@ -14,6 +14,8 @@ import sqlite3
 
 from TripCostUser import TripCostUser
 
+from datetime import date
+
 # from flask_wtf import Form, RecaptchaField
 # from wtforms import TextField, HiddenField, ValidationError, RadioField,\
 #     BooleanField, SubmitField, IntegerField, FormField, validators
@@ -133,25 +135,25 @@ def close_db(error):
 @app.route('/expenses')
 @login_required
 def showexpenses():
+    db=get_db()
+    cursor = db.execute("select * from expense where ExpenseOwner=?", current_user.get_id())
+    expenselist=cursor.fetchall()
     is_logged_in = current_user.is_authenticated()
-    return render_template('expenses.html', is_logged_in=is_logged_in)
+    return render_template('expenses.html', is_logged_in=is_logged_in, expenselist=expenselist)
     pass
 
-@app.route('/saveexpenses', methods=['GET', 'POST'])
+@app.route('/saveexpenses', methods=['POST'])
 @login_required
 def saveexpense():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        remember = request.form.get('remember') == 'on'
-        
+        item = request.form.get('item')
+        price = request.form.get('price')
+        quantity = request.form.get('quantity')
+        d = date.today()
         db = get_db()
-        cursor = db.execute("select * from user where Username=?", [email])
-        row = cursor.fetchone()
-        if row is not None:
-            if row['Password'] == password:
-                user = load_user( unicode(row['UserID']) )
-                login_user(user, remember=remember)
+        db.execute("insert into expense (Item, Price, Quantity, PurchaseDate, ExpenseOwner) values (?, ?, ?, ?, ?)", [item, price, quantity, d, current_user.get_id()])
+        db.commit()
+    return redirect( '/expenses' )
 
 @app.route('/savevehicle')
 @login_required

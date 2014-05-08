@@ -1,0 +1,50 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block title %}TripCost - About us{% endblock %}
+
+{% block head %}
+{{ super() }}
+{{ fixes.ie8() }}
+{% endblock %}
+
+{% block metas %}
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+{% endblock %}
+
+{% block styles -%}
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+<link href="{{url_for('.static', filename='css/dist/combined.min.css')}}" rel="stylesheet">
+{% endblock styles %}
+
+{% block scripts %}
+<script src="{{url_for('.static', filename='js/dist/combined.min.js')}}"></script>
+{% endblock %}
+
+{% block content %}
+
+{% include 'nav.html' %}
+
+<div class="container container-pushed register">
+   <div class="table-responsive">
+     <table class="table table-striped">
+      <tr>
+         <th>Item</th>
+         <th>Price</th> 
+         <th>Quantity</th>
+         <th>Date of Purchase</th>
+      </tr>
+      {% for row in expenselist %}
+      <tr>
+         <td>{{row['Item']}}</td>
+         <td>${{'%.2f' % row['Price']}}</td>
+         <td>{{row['Quantity']}}</td>
+         <td>{{row['PurchaseDate']}}</td>
+      </tr>
+      {% endfor %}
+     </table>
+   </div>
+</div>
+
+{% endblock %}
