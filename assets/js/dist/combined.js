@@ -14820,6 +14820,15 @@ if (typeof window.sdkAsyncInit === "function") {
 })(window.jQuery);
 var MarkerGenerator = (function() {
 
+    /*
+    |--------------------------------------------------------------------------
+    | MarkerGenerator
+    |--------------------------------------------------------------------------
+    |
+    | This object takes care of generating markers on the map.
+    | Requires two dependencies: google API and the main map object
+    |
+    */
     function MarkerGenerator(_google, _map) {
 
         // Dependency: Google Maps API
@@ -14836,16 +14845,7 @@ var MarkerGenerator = (function() {
 
         this.icons = new Array();
 
-        // this.icons["green"] = new this.googleProvider.maps.MarkerImage('/assets/img/green-marker.png',
-        //     new this.googleProvider.maps.Size(40, 64),
-
-        //     new this.googleProvider.maps.Point(0, 0),
-
-        //     new this.googleProvider.maps.Point(10, 32),
-
-        //     new this.googleProvider.maps.Size(20, 32)
-        // );
-
+        // Create a magenta marker
         this.icons["magenta"] = new this.googleProvider.maps.MarkerImage('/assets/img/magenta-marker.png',
             new this.googleProvider.maps.Size(40, 64),
 
@@ -14856,6 +14856,7 @@ var MarkerGenerator = (function() {
             new this.googleProvider.maps.Size(20, 32)
         );
 
+        // Create a yellow marker
         this.icons["yellow"] = new this.googleProvider.maps.MarkerImage('/assets/img/yellow-marker.png',
             new this.googleProvider.maps.Size(40, 64),
 
@@ -14865,8 +14866,6 @@ var MarkerGenerator = (function() {
 
             new this.googleProvider.maps.Size(20, 32)
         );
-
-
 
         this.iconShape = {
             coord: [9, 0, 6, 1, 4, 2, 2, 4, 0, 8, 0, 12, 1, 14, 2, 16, 5, 19, 7, 23, 8, 26, 9, 30, 9, 34, 11, 34, 11, 30, 12, 26, 13, 24, 14, 21, 16, 18, 18, 16, 20, 12, 20, 8, 18, 4, 16, 2, 15, 1, 13, 0],
@@ -15147,6 +15146,14 @@ var TripCost = (function() {
             });
         },
 
+        /*
+        |--------------------------------------------------------------------------
+        | Get the user's current location
+        |--------------------------------------------------------------------------
+        |
+        | Get the user's current location and handle user interface
+        |
+        */
         currentLocation: function(jQuery, options) {
 
             var classes = {

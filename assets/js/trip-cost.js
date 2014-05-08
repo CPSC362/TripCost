@@ -90,6 +90,14 @@ var TripCost = (function() {
             });
         },
 
+        /*
+        |--------------------------------------------------------------------------
+        | Get the user's current location
+        |--------------------------------------------------------------------------
+        |
+        | Get the user's current location and handle user interface
+        |
+        */
         currentLocation: function(jQuery, options) {
 
             var classes = {
