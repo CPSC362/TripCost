@@ -138,8 +138,11 @@ def showexpenses():
     db=get_db()
     cursor = db.execute("select * from expense where ExpenseOwner=?", current_user.get_id())
     expenselist=cursor.fetchall()
+    totalExpenseCost=0
+    for row in expenselist:
+        totalExpenseCost+=(row['Price']*row['Quantity'])
     is_logged_in = current_user.is_authenticated()
-    return render_template('expenses.html', is_logged_in=is_logged_in, expenselist=expenselist)
+    return render_template('expenses.html', is_logged_in=is_logged_in, expenselist=expenselist, totalExpenseCost=totalExpenseCost)
     pass
 
 @app.route('/saveexpenses', methods=['POST'])
@@ -152,6 +155,16 @@ def saveexpense():
         d = date.today()
         db = get_db()
         db.execute("insert into expense (Item, Price, Quantity, PurchaseDate, ExpenseOwner) values (?, ?, ?, ?, ?)", [item, price, quantity, d, current_user.get_id()])
+        db.commit()
+    return redirect( '/expenses' )
+
+@app.route('/deleteexpenses', methods=['POST'])
+@login_required
+def deleteexpense():
+    if request.method == 'POST':
+        expenseid =  request.form.get('id')
+        db = get_db()
+        db.execute("delete from expense where ExpenseID=?", [expenseid])
         db.commit()
     return redirect( '/expenses' )
 
