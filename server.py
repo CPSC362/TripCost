@@ -146,7 +146,7 @@ def showexpenses():
 def saveexpense():
     if request.method == 'POST':
         item = request.form.get('item')
-        price = request.form.get('price')
+        price = float(request.form.get('price'))
         quantity = request.form.get('quantity')
         d = date.today()
         db = get_db()
