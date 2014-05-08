@@ -96,11 +96,6 @@ def about():
     is_logged_in = current_user.is_authenticated()
     return render_template('about.html', is_logged_in=is_logged_in)
 
-@app.route('/test')
-@login_required
-def test():
-    return redirect( url_for('about') )
-
 @login_manager.user_loader
 def load_user(userid):
     db = get_db()
@@ -150,7 +145,7 @@ def showexpenses():
 def saveexpense():
     if request.method == 'POST':
         item = request.form.get('item')
-        price = request.form.get('price')
+        price = float(request.form.get('price'))
         quantity = request.form.get('quantity')
         d = date.today()
         db = get_db()
