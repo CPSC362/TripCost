@@ -96,11 +96,6 @@ def about():
     is_logged_in = current_user.is_authenticated()
     return render_template('about.html', is_logged_in=is_logged_in)
 
-@app.route('/test')
-@login_required
-def test():
-    return redirect( url_for('about') )
-
 @login_manager.user_loader
 def load_user(userid):
     db = get_db()
@@ -138,8 +133,11 @@ def showexpenses():
     db=get_db()
     cursor = db.execute("select * from expense where ExpenseOwner=?", current_user.get_id())
     expenselist=cursor.fetchall()
+    print(expenselist)
     totalExpenseCost=0
     for row in expenselist:
+        print(row)
+        print(row['Price'])
         totalExpenseCost+=(row['Price']*row['Quantity'])
     is_logged_in = current_user.is_authenticated()
     return render_template('expenses.html', is_logged_in=is_logged_in, expenselist=expenselist, totalExpenseCost=totalExpenseCost)
