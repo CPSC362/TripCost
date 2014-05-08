@@ -113,6 +113,38 @@
           </ul>
         </li>
       {% else %}
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Expenses<b class="caret"></b></a>
+          <ul class="dropdown-menu" style="padding: 15px;min-width: 250px;">
+            <form action="/saveexpenses" method="post">
+              <li>
+                <div class="row">
+                  <div class="col-md-12">
+                    <form class="form" role="form" method="post" action="saveexpenses" accept-charset="UTF-8" id="saveexpenses-nav">
+                      <div class ="form-group">
+                        <label class="sr-only" for="exampleItem">Item</label>
+                        <input type="text" class="form-control" name="item" id="exampleItem" placeholder="Coffee" required>
+                      </div>
+                      <div class="form-group">
+                        <label class="sr-only" for="examplePrice">Price $</label>
+                        <input type="number" name="price" min="0" step="0.01" title="CDA Currency Format - no dollar sign and no comma(s) - cents (.##) are optional" placeholder="0.00">
+                      </div>
+                      <div class="form-group">
+                        <label class="sr-only" for="exampleQuantity">Quantity</label>
+                        <input type="number" name="quantity" min="1" step="1" title="Must be a postive integer" placeholder="1">
+                      </div>
+                      <div class="form-group">
+                        <button type="submit" class="btn btn-success btn-block">Add Expense</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </li>
+              <li class="divider"></li>
+            </form>
+            <li id="expenses-button"><a href="/expenses"><button class="btn btn-primary btn-block">My Expenses</button></a></li>
+          </ul>
+        </li>
         <li><a href="{{ url_for('logout') }}">Sign Out</a></li>
       {% endif %}
       </ul>

@@ -133,9 +133,11 @@ def close_db(error):
 @app.route('/expenses')
 @login_required
 def showexpenses():
+    is_logged_in = current_user.is_authenticated()
+    return render_template('expenses.html')
     pass
 
-@app.route('/saveexpense')
+@app.route('/saveexpenses', methods=['GET', 'POST'])
 @login_required
 def saveexpense():
     pass

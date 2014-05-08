@@ -26,9 +26,7 @@ create table expense
 	Quantity int,
 	PurchaseDate text,
 	ExpenseOwner int not null,
-	ExpenseTripID int not null,
 	foreign key (ExpenseOwner) references user (UserID),
-	foreign key (ExpenseTripID) references trip (TripID)
 );
 
 create table vehicle
