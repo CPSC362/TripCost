@@ -168,6 +168,18 @@ def deleteexpense():
         db.commit()
     return redirect( '/expenses' )
 
+@app.route('/totalexpensecostjson')
+@login_required
+def gettotalexpensecostjson():
+    db=get_db()
+    cursor = db.execute("select * from expense where ExpenseOwner=?", current_user.get_id())
+    expenselist=cursor.fetchall()
+    expenseCost={}
+    expenseCost['total']=0
+    for row in expenselist:
+        expenseCost['total']+=(row['Price']*row['Quantity'])
+    return jsonify(expenseCost)
+
 @app.route('/savevehicle')
 @login_required
 def savevehicle():

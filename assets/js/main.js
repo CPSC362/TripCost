@@ -178,6 +178,8 @@ $(function() {
                                 ege: totals.egeTotalCost,
                                 mainImage: tripCost.vehicle.mainImage,
                                 name: tripCost.vehicle.name
+                                epatrip: totals.epaTotalTripCost
+                                egetrip: totals.egeTotalTripCost
                             }));
 
                         });

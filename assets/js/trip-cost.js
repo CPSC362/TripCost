@@ -221,7 +221,9 @@ var TripCost = (function() {
                 distanceInMiles,
                 totals = {
                     epaTotalCost: 0,
-                    egeTotalCost: 0
+                    egeTotalCost: 0,
+                    epaTotalTripCost: 0,
+                    egeTotalTripCost: 0
                 };
 
             for (var i = 0, s = distancePartials.length; i < s; ++i) {
@@ -238,6 +240,28 @@ var TripCost = (function() {
                 totals.epaTotalCost += epaCost;
                 totals.egeTotalCost += egeCost;
             }
+
+            var totalExpenseCost=0;
+
+            $.getJSON( "ajax/test.json", function( data ) {
+              var items = [];
+              $.each( data, function( key, val ) {
+                items.push( "<li id='" + key + "'>" + val + "</li>" );
+              });
+             
+              $( "<ul/>", {
+                "class": "my-new-list",
+                html: items.join( "" )
+              }).appendTo( "body" );
+            });
+
+            /*$.getJSON( "/totalexpensecostjson", function (data) {
+                $.each( data, function( key, val ) {
+                    console.log("success");
+                    totalExpenseCost=val;});});*/
+
+            totals.epaTotalTripCost= totals.epaTotalCost + totalExpenseCost;
+            totals.egeTotalTripCost= totals.egeTotalCost + totalExpenseCost;
 
             return totals;
         },

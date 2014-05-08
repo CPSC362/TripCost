@@ -26,15 +26,18 @@
           <div class="cost-analysis">
             <span class="label label-primary">EPA Estimated Cost:</span>
             <strong>${{formatNumber epa}}</strong>
+            <span class="label label-info">EPA + Expenses:</span>
+            <strong>${{formatNumber epatrip}}</strong>
           </div>
           {{/if}}
           {{#if ege}}
           <div class="cost-analysis">
             <span class="label label-primary">EGE Estimated Cost:</span>
             <strong>${{formatNumber ege}}</strong>
+            <span class="label label-info">EGE + Expenses:</span>
+            <strong>${{formatNumber egetrip}}</strong>
           </div>
           {{/if}}
-        </ul>
       </div>
     </div>
   </div>
