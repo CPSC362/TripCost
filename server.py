@@ -133,7 +133,6 @@ def showexpenses():
     db=get_db()
     cursor = db.execute("select * from expense where ExpenseOwner=?", current_user.get_id())
     expenselist=cursor.fetchall()
-    print(expenselist)
     totalExpenseCost=0
     for row in expenselist:
         totalExpenseCost+=(row['Price']*row['Quantity'])
