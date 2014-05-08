@@ -134,13 +134,24 @@ def close_db(error):
 @login_required
 def showexpenses():
     is_logged_in = current_user.is_authenticated()
-    return render_template('expenses.html')
+    return render_template('expenses.html', is_logged_in=is_logged_in)
     pass
 
 @app.route('/saveexpenses', methods=['GET', 'POST'])
 @login_required
 def saveexpense():
-    pass
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        remember = request.form.get('remember') == 'on'
+        
+        db = get_db()
+        cursor = db.execute("select * from user where Username=?", [email])
+        row = cursor.fetchone()
+        if row is not None:
+            if row['Password'] == password:
+                user = load_user( unicode(row['UserID']) )
+                login_user(user, remember=remember)
 
 @app.route('/savevehicle')
 @login_required
