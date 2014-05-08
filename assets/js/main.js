@@ -171,16 +171,17 @@ $(function() {
                             }
 
                             // Calculate the trip cost
-                            var totals = tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange);
+                            tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange, function(totals) {
 
-                            $('#results-container').html(TripCostTemplates.results({
-                                epa: totals.epaTotalCost,
-                                ege: totals.egeTotalCost,
-                                mainImage: tripCost.vehicle.mainImage,
-                                name: tripCost.vehicle.name
-                                epatrip: totals.epaTotalTripCost
-                                egetrip: totals.egeTotalTripCost
-                            }));
+                                $('#results-container').html(TripCostTemplates.results({
+                                    epa: totals.epaTotalCost,
+                                    ege: totals.egeTotalCost,
+                                    mainImage: tripCost.vehicle.mainImage,
+                                    name: tripCost.vehicle.name
+                                    epatrip: totals.epaTotalTripCost
+                                    egetrip: totals.egeTotalTripCost
+                                }));
+                            });
 
                         });
                     };

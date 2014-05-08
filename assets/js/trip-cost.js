@@ -214,7 +214,7 @@ var TripCost = (function() {
         | used.
         |
         */
-        calculateAllTheThings: function(trip, allStations, gasFeed, markerGenerator, maxRange) {
+        calculateAllTheThings: function(trip, allStations, gasFeed, markerGenerator, maxRange, callback) {
 
             var gasPrices = gasFeed.allGasPricesByCheapest(allStations, function(stations) {
                 markerGenerator.gasStationHandler(stations)
@@ -249,18 +249,18 @@ var TripCost = (function() {
                 totals.egeTotalCost += egeCost;
             }
 
-            var totalExpenseCost=0;
+            var totalExpenseCost = 0;
 
-            $.getJSON( "/totalexpensecostjson", function (data) {
-                $.each( data, function( key, val ) {
-                    console.log("success");
-                    totalExpenseCost=val;});});
-            console.log("got here");
+            $.getJSON("/totalexpensecostjson", function(data) {
+                $.each(data, function(key, val) {
 
-            totals.epaTotalTripCost= totals.epaTotalCost + totalExpenseCost;
-            totals.egeTotalTripCost= totals.egeTotalCost + totalExpenseCost;
+                    totals.epaTotalTripCost = totals.epaTotalCost + totalExpenseCost;
+                    totals.egeTotalTripCost = totals.egeTotalCost + totalExpenseCost;
+                    totals.expenseCost = val;
 
-            return totals;
+                    callback(totals);
+                });
+            });
         },
 
         startLocation: function(googleDirections) {
