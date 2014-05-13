@@ -28,6 +28,8 @@ function program1(depth0,data) {
   var buffer = "", helper, options;
   buffer += "\n          <div class=\"cost-analysis\">\n            <span class=\"label label-primary\">EPA Estimated Cost:</span>\n            <strong>$"
     + escapeExpression((helper = helpers.formatNumber || (depth0 && depth0.formatNumber),options={hash:{},data:data},helper ? helper.call(depth0, (depth0 && depth0.epa), options) : helperMissing.call(depth0, "formatNumber", (depth0 && depth0.epa), options)))
+    + "</strong>\n            <span class=\"label label-info\">EPA + Expenses:</span>\n            <strong>$"
+    + escapeExpression((helper = helpers.formatNumber || (depth0 && depth0.formatNumber),options={hash:{},data:data},helper ? helper.call(depth0, (depth0 && depth0.epatrip), options) : helperMissing.call(depth0, "formatNumber", (depth0 && depth0.epatrip), options)))
     + "</strong>\n          </div>\n          ";
   return buffer;
   }
@@ -37,6 +39,8 @@ function program3(depth0,data) {
   var buffer = "", helper, options;
   buffer += "\n          <div class=\"cost-analysis\">\n            <span class=\"label label-primary\">EGE Estimated Cost:</span>\n            <strong>$"
     + escapeExpression((helper = helpers.formatNumber || (depth0 && depth0.formatNumber),options={hash:{},data:data},helper ? helper.call(depth0, (depth0 && depth0.ege), options) : helperMissing.call(depth0, "formatNumber", (depth0 && depth0.ege), options)))
+    + "</strong>\n            <span class=\"label label-info\">EGE + Expenses:</span>\n            <strong>$"
+    + escapeExpression((helper = helpers.formatNumber || (depth0 && depth0.formatNumber),options={hash:{},data:data},helper ? helper.call(depth0, (depth0 && depth0.egetrip), options) : helperMissing.call(depth0, "formatNumber", (depth0 && depth0.egetrip), options)))
     + "</strong>\n          </div>\n          ";
   return buffer;
   }
@@ -59,7 +63,7 @@ function program3(depth0,data) {
   buffer += "\n          ";
   stack1 = helpers['if'].call(depth0, (depth0 && depth0.ege), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n        </ul>\n      </div>\n    </div>\n  </div>\n</div>";
+  buffer += "\n      </div>\n    </div>\n  </div>\n</div>";
   return buffer;
   });
 

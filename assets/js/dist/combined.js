@@ -15270,7 +15270,7 @@ var TripCost = (function() {
         | used.
         |
         */
-        calculateAllTheThings: function(trip, allStations, gasFeed, markerGenerator, maxRange) {
+        calculateAllTheThings: function(trip, allStations, gasFeed, markerGenerator, maxRange, callback) {
 
             var gasPrices = gasFeed.allGasPricesByCheapest(allStations, function(stations) {
                 markerGenerator.gasStationHandler(stations)
@@ -15285,7 +15285,9 @@ var TripCost = (function() {
                 distanceInMiles,
                 totals = {
                     epaTotalCost: 0,
-                    egeTotalCost: 0
+                    egeTotalCost: 0,
+                    epaTotalTripCost: 0,
+                    egeTotalTripCost: 0
                 };
 
             for (var i = 0, s = distancePartials.length; i < s; ++i) {
@@ -15303,7 +15305,18 @@ var TripCost = (function() {
                 totals.egeTotalCost += egeCost;
             }
 
-            return totals;
+            var totalExpenseCost = 0;
+
+            $.getJSON("/totalexpensecostjson", function(data) {
+                $.each(data, function(key, val) {
+
+                    totals.epaTotalTripCost = totals.epaTotalCost + totalExpenseCost;
+                    totals.egeTotalTripCost = totals.egeTotalCost + totalExpenseCost;
+                    totals.expenseCost = val;
+
+                    callback(totals);
+                });
+            });
         },
 
         startLocation: function(googleDirections) {
@@ -16338,14 +16351,17 @@ $(function() {
                             }
 
                             // Calculate the trip cost
-                            var totals = tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange);
+                            tripCost.calculateAllTheThings(trip, allStations, gasFeed, markerGenerator, maxRange, function(totals) {
 
-                            $('#results-container').html(TripCostTemplates.results({
-                                epa: totals.epaTotalCost,
-                                ege: totals.egeTotalCost,
-                                mainImage: tripCost.vehicle.mainImage,
-                                name: tripCost.vehicle.name
-                            }));
+                                $('#results-container').html(TripCostTemplates.results({
+                                    epa: totals.epaTotalCost,
+                                    ege: totals.egeTotalCost,
+                                    mainImage: tripCost.vehicle.mainImage,
+                                    name: tripCost.vehicle.name,
+                                    epatrip: totals.epaTotalTripCost,
+                                    egetrip: totals.egeTotalTripCost
+                                }));
+                            });
 
                         });
                     };
@@ -16558,6 +16574,8 @@ function program1(depth0,data) {
   var buffer = "", helper, options;
   buffer += "\n          <div class=\"cost-analysis\">\n            <span class=\"label label-primary\">EPA Estimated Cost:</span>\n            <strong>$"
     + escapeExpression((helper = helpers.formatNumber || (depth0 && depth0.formatNumber),options={hash:{},data:data},helper ? helper.call(depth0, (depth0 && depth0.epa), options) : helperMissing.call(depth0, "formatNumber", (depth0 && depth0.epa), options)))
+    + "</strong>\n            <span class=\"label label-info\">EPA + Expenses:</span>\n            <strong>$"
+    + escapeExpression((helper = helpers.formatNumber || (depth0 && depth0.formatNumber),options={hash:{},data:data},helper ? helper.call(depth0, (depth0 && depth0.epatrip), options) : helperMissing.call(depth0, "formatNumber", (depth0 && depth0.epatrip), options)))
     + "</strong>\n          </div>\n          ";
   return buffer;
   }
@@ -16567,6 +16585,8 @@ function program3(depth0,data) {
   var buffer = "", helper, options;
   buffer += "\n          <div class=\"cost-analysis\">\n            <span class=\"label label-primary\">EGE Estimated Cost:</span>\n            <strong>$"
     + escapeExpression((helper = helpers.formatNumber || (depth0 && depth0.formatNumber),options={hash:{},data:data},helper ? helper.call(depth0, (depth0 && depth0.ege), options) : helperMissing.call(depth0, "formatNumber", (depth0 && depth0.ege), options)))
+    + "</strong>\n            <span class=\"label label-info\">EGE + Expenses:</span>\n            <strong>$"
+    + escapeExpression((helper = helpers.formatNumber || (depth0 && depth0.formatNumber),options={hash:{},data:data},helper ? helper.call(depth0, (depth0 && depth0.egetrip), options) : helperMissing.call(depth0, "formatNumber", (depth0 && depth0.egetrip), options)))
     + "</strong>\n          </div>\n          ";
   return buffer;
   }
@@ -16589,7 +16609,7 @@ function program3(depth0,data) {
   buffer += "\n          ";
   stack1 = helpers['if'].call(depth0, (depth0 && depth0.ege), {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n        </ul>\n      </div>\n    </div>\n  </div>\n</div>";
+  buffer += "\n      </div>\n    </div>\n  </div>\n</div>";
   return buffer;
   });
 
